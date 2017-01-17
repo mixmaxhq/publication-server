@@ -1,6 +1,5 @@
 'use strict';
 
-const WebSocketServer = require('ws').Server;
 const _ = require('underscore');
 const Primus = require('primus');
 
