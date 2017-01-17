@@ -14,8 +14,10 @@
   "license": "MIT",
   "dependencies": {
     "double-ended-queue": "2.1.0-0",
+    "ejson": "2.1.2",
     "node-uuid": "1.4.7",
     "primus": "6.0.8",
-    "underscore": "1.8.3"
+    "underscore": "1.8.3",
+    "uws": "0.12.0"
   }
 }

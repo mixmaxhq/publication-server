@@ -16,12 +16,10 @@ class PublicationServer {
    *
    * @param {Function} authFn The function for authenticating connections.
    */
-  constructor({authFn, mountPath, parser='EJSON', transport='uws'} = {}) {
+  constructor({authFn, mountPath} = {}) {
     this._subscriptions = {};
     this._authFn = authFn;
     this._mountPath = mountPath;
-    this._parser = parser;
-    this._transport = transport;
   }
 
   /**
@@ -48,8 +46,8 @@ class PublicationServer {
     const primus = new Primus(server, {
       authorization: this._authFn,
       pathname: this._mountPath,
-      parser: this._parser,
-      transformer: this._transport
+      parser: 'EJSON',
+      transformer: 'uws'
     });
 
     primus.on('connection', (spark) => {
