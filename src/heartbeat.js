@@ -10,6 +10,10 @@ class Heartbeat {
    */
   constructor({session} = {}) {
     this._session = session;
+
+    // We call `reset` inside of process.nextTick, se we need to bind
+    // its context here.
+    this.reset = this.reset.bind(this);
   }
 
   /**

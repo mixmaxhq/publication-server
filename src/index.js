@@ -2,6 +2,7 @@
 
 const WebSocketServer = require('ws').Server;
 const _ = require('underscore');
+const Primus = require('primus');
 
 const Session = require('./session');
 
@@ -16,9 +17,12 @@ class PublicationServer {
    *
    * @param {Function} authFn The function for authenticating connections.
    */
-  constructor(authFn) {
+  constructor({authFn, mountPath, parser='EJSON', transport='uws'} = {}) {
     this._subscriptions = {};
     this._authFn = authFn;
+    this._mountPath = mountPath;
+    this._parser = parser;
+    this._transport = transport;
   }
 
   /**
@@ -42,9 +46,15 @@ class PublicationServer {
    */
   attachToServer(server) {
     const self = this;
-    const wss = new WebSocketServer({ server});
-    wss.on('connection', (ws) => {
-      new Session({server: self, ws, authFn: this._authFn});
+    const primus = new Primus(server, {
+      authorization: this._authFn,
+      pathname: this._mountPath,
+      parser: this._parser,
+      transformer: this._transport
+    });
+
+    primus.on('connection', (spark) => {
+      new Session({server: self, spark});
     });
   }
 }

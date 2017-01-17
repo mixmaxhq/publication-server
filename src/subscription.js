@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('underscore');
-const sync = require('synchronize');
 
 const PUBLIC_API = ['userId', 'added', 'changed', 'removed'];
 
@@ -37,15 +36,7 @@ class Subscription {
    * Starts the publication. Currently, it spawns it inside of a fiber.
    */
   start() {
-    const self = this;
-    sync.fiber(() => {
-      self._handler.apply(_.pick(self, PUBLIC_API.concat(['onStop', 'ready'])), self._params);
-
-      // This is safe to call multiple times, and we need to ensure that we
-      // mark the subscription as ready (in case the client didn't call
-      // `ready()`).
-      self.ready();
-    });
+    this._handler.apply(_.pick(this, PUBLIC_API.concat(['onStop', 'ready'])), this._params);
   }
 
   /**
@@ -77,9 +68,7 @@ class Subscription {
    * Currently, it runs them all sequentially.
    */
   stop() {
-    sync.fiber(() => {
-      _.each(this._stopCallbacks, (fn) => fn());
-    });
+    _.each(this._stopCallbacks, (fn) => fn());
   }
 }
 

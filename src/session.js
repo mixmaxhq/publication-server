@@ -5,37 +5,28 @@ const url = require('url');
 const querystring = require('querystring');
 const crypto = require('crypto');
 const _ = require('underscore');
-const sync = require('synchronize');
 const uuid = require('node-uuid');
-const EJSON = require('ejson');
-
 
 const Heartbeat = require('./heartbeat');
 const Subscription = require('./subscription');
 
 /**
  * A Session represents the state for a given session. Currently, this is
- * primarily a wrapper for a websocket and the subscriptions that a connection
+ * primarily a wrapper for a spark and the subscriptions that a connection
  * has subscribed to.
  */
 class Session {
 
   /**
-   * Constructs a session for a given WebSocket. It also takes an authentication
-   * function in order to authenticate websockets.
+   * Constructs a session for a given Primus spark.
    *
    * @param {Object} server The PublicationServer that created this Session.
-   * @param {Object} ws The WebSocket that this session has access to.
-   * @param {Function} authFn A required authentication function. See the README
-   *    for details such as the provided params and expected usage.
+   * @param {Object} spark The Primus spark that this session has access to.
    */
-  constructor({server, ws, authFn} = {}) {
+  constructor({server, spark} = {}) {
     this.server = server;
-    this.ws = ws;
-    this.authFn = authFn;
+    this.spark = spark;
     this._openSubscriptions = {};
-
-    let self = this;
 
     // We expose these on child subscriptions, so we need to ensure
     // that they reference this parent session.
@@ -49,36 +40,26 @@ class Session {
       connect: this.connect.bind(this),
       pong: this.pong.bind(this)
     };
+    this.processMsg = this.processMsg.bind(this);
 
-    this.authFn(ws, (err, userId) => {
-      if (err) {
-        ws.close();
-        return;
-      } else if (!userId) {
-        ws.close();
-        return;
-      }
+    // Set some state on the session.
+    this._waitingForConnect = true;
+    this.userId = spark.request.userId;
+    this.isRunning = true;
+    this.msgQueue = new Dequeue();
+    this.attachEventHandlers();
 
-      // Set some state on the session.
-      self._waitingForConnect = true;
-      self.userId = userId;
-      self.isRunning = true;
-      self.msgQueue = new Dequeue();
-      self.attachEventHandlers(ws);
-
-      // Start the heartbeat.
-      self._heartbeat = new Heartbeat({ session: self });
-      self._heartbeat.start();
-    });
+    // Start the heartbeat.
+    this._heartbeat = new Heartbeat({ session: this });
+    this._heartbeat.start();
   }
 
   /**
-   * Sends the given payload over the WebSocket.
-   * @param {Object} payload The payload to send over the WebSocket. Prior to
-   *    being sent, it will being "encoded" with `EJSON.stringify`.
+   * Sends the given payload over the spark.
+   * @param {Object} payload The payload to send over the spark.
    */
   send(payload) {
-    this.ws.send(EJSON.stringify(payload));
+    this.spark.write(payload);
   }
 
   /**
@@ -218,7 +199,7 @@ class Session {
     //  - connect
     //  - sub
     //  - unsub
-    let handler = this.handlers[msg.type];
+    let handler = this.handlers[msg.msg];
     if (!handler) {
       // DDP doesn't really have a generic way to return an error (i.e. for a
       // message with an unknown type), so let's just swallow the error.
@@ -297,40 +278,37 @@ class Session {
     _.invoke(this._openSubscriptions, 'stop');
 
     this._heartbeat.stop();
-    this.ws.close();
+    this.spark.end();
   }
 
   /**
    * Attaches the event handles to the WebSocket.
-   * @param {Object} ws The WebSocket to listen to the `close`, `error` and
-   *    `message` events on.
    */
-  attachEventHandlers(ws) {
-    let self = this;
-    ws.on('close', () => {
+  attachEventHandlers() {
+    let self = this,
+        spark = this.spark;
+    spark.on('end', () => {
       self.stop();
     });
 
-    ws.on('error', (err) => {
+    spark.on('error', (err) => {
       self.stop();
     });
 
-    ws.on('message', (data) => {
+    spark.on('data', (data) => {
       try {
-        const parsed = EJSON.parse(data);
-        if (!parsed.type) {
-          // While we currently only support `subscribe` this will keep
-          // us forward compatible.
+        if (!data.msg) {
+          // If no msg type was sent, ignore it.
           return;
         }
 
         // TODO: should this only done once we send the `connected` message?
         // Safety belts for the race condition, where a bad client sends a
         // message before we tell them that we're connected.
-        if (self._heartbeat) self._heartbeat.pong();
+        if (self._heartbeat) process.nextTick(self._heartbeat.reset);
 
-        self.msgQueue.push(parsed);
-        self.processMsg();
+        self.msgQueue.push(data);
+        process.nextTick(self.processMsg);
       } catch (err) {
         // Log this error?
       }
