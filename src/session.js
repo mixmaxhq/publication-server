@@ -1,6 +1,5 @@
 'use strict';
 
-const Dequeue = require('double-ended-queue');
 const _ = require('underscore');
 const uuid = require('node-uuid');
 
@@ -36,7 +35,6 @@ class Session {
     this._waitingForConnect = true;
     this.userId = spark.request.userId;
     this.isRunning = true;
-    this.msgQueue = new Dequeue();
     this.attachEventHandlers();
   }
 
@@ -116,7 +114,7 @@ class Session {
       this.send({
         msg: 'error',
         reason: 'connect-must-be-first',
-        offendingMsg: msg
+        offendingMessage: msg
       });
       return;
     }
