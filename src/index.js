@@ -15,11 +15,24 @@ class PublicationServer {
    * new connections.
    *
    * @param {Function} authFn The function for authenticating connections.
+   * @param {String} mountPath The URL to mount the listener on.
+   * @param {Object} server The HTTP server to allow Primus to listen on.
    */
-  constructor({authFn, mountPath} = {}) {
+  constructor({authFn, mountPath, server} = {}) {
     this._subscriptions = {};
     this._authFn = authFn;
     this._mountPath = mountPath;
+
+    this._primus = new Primus(server, {
+      authorization: this._authFn,
+      pathname: this._mountPath,
+      parser: 'EJSON',
+      transformer: 'uws'
+    });
+
+    this._primus.on('connection', (spark) => {
+      new Session({server: this, spark});
+    });
   }
 
   /**
@@ -34,25 +47,6 @@ class PublicationServer {
     if (this._subscriptions[name]) throw new Error(`handler ${name} already defined`);
 
     this._subscriptions[name] = func;
-  }
-
-  /**
-   * Attaches the publication server to the given HTTP server.
-   *
-   * @param {Object} server The server to connect the WebSocketServer to.
-   */
-  attachToServer(server) {
-    const self = this;
-    const primus = new Primus(server, {
-      authorization: this._authFn,
-      pathname: this._mountPath,
-      parser: 'EJSON',
-      transformer: 'uws'
-    });
-
-    primus.on('connection', (spark) => {
-      new Session({server: self, spark});
-    });
   }
 }
 

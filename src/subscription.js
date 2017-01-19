@@ -2,8 +2,6 @@
 
 const _ = require('underscore');
 
-const PUBLIC_API = ['userId', 'added', 'changed', 'removed'];
-
 /**
  * Represents a subscription to a publication for a Session.
  */
@@ -19,24 +17,77 @@ class Subscription {
    *    Subscription.
    */
   constructor({session, name, handler, params, id} = {}) {
-    _.extend(this, _.pick(session, PUBLIC_API));
-    this._name = name;
     this._session = session;
+    this._name = name;
     this._handler = handler;
     this._params = params;
     this._id = id;
-    this.onStop = this.onStop.bind(this);
-    this.ready = this.ready.bind(this);
     this._isReady = false;
 
     this._stopCallbacks = [];
   }
 
   /**
-   * Starts the publication. Currently, it spawns it inside of a fiber.
+   * Starts the publication.
    */
   start() {
-    this._handler.apply(_.pick(this, PUBLIC_API.concat(['onStop', 'ready'])), this._params);
+    this._handler.apply({
+      userId: this._session.userId,
+
+      /**
+       * Sends an added message adding an object with the given `id` to the given
+       * `collection`.
+       *
+       * @param {String} collection The collection that the document is being added
+       *    to.
+       * @param {String} id The ID of the document being added.
+       * @param {Object} fields The fields that comprise the document being added.
+       */
+      added: (collection, id, fields) => {
+        this._session.send({
+          msg: 'added',
+          collection,
+          id,
+          fields
+        });
+      },
+
+      /**
+       * Sends a changed message changing the object with the given `id` in the
+       * given `collection`.
+       *
+       * @param {String} collection The collection that the document that is being
+       *    changed is a member of.
+       * @param {String} id The ID of the document being changed.
+       * @param {Object} fields The fields that have been changed.
+       */
+      changed: (collection, id, fields) => {
+        this._session.send({
+          msg: 'changed',
+          collection,
+          id,
+          fields
+        });
+      },
+
+      /**
+       * Sends a removed message removing the object with the given `id` from the
+       * given `collection`.
+       *
+       * @param {String} collection The collection that the document is being
+       *    removed from.
+       * @param {String} id The ID of the document being removed.
+       */
+      removed(collection, id) {
+        this._session.send({
+          msg: 'removed',
+          collection,
+          id
+        });
+      },
+      onStop: this.onStop.bind(this),
+      ready: this.ready.bind(this)
+    }, this._params);
   }
 
   /**

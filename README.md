@@ -11,10 +11,13 @@ var express = require('express');
 var PublicationServer = require('publication-server');
 
 var app = express();
-var pubServer = new PublicationServer(authenticationFunction);
-
 var server = require('http').createServer(app);
-pubServer.attachToServer(server);
+
+var pubServer = new PublicationServer({
+  authFn: authenticationFunction,
+  mountPath: '/ws',
+  server
+});
 
 // ...
 

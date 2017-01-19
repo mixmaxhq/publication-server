@@ -1,9 +1,6 @@
 'use strict';
 
 const Dequeue = require('double-ended-queue');
-const url = require('url');
-const querystring = require('querystring');
-const crypto = require('crypto');
 const _ = require('underscore');
 const uuid = require('node-uuid');
 
@@ -26,21 +23,15 @@ class Session {
   constructor({server, spark} = {}) {
     this.server = server;
     this.spark = spark;
-    this._openSubscriptions = {};
+    this._subscriptions = {};
 
-    // We expose these on child subscriptions, so we need to ensure
-    // that they reference this parent session.
-    this.send = this.send.bind(this);
-    this.added = this.added.bind(this);
-    this.changed = this.changed.bind(this);
-    this.removed = this.removed.bind(this);
     this.handlers = {
-      sub: this.subscribeWebSocket.bind(this),
-      unsub: this.unsubscribeWebSocket.bind(this),
+      sub: this.subscribe.bind(this),
+      unsub: this.unsubscribe.bind(this),
       connect: this.connect.bind(this),
-      pong: this.pong.bind(this)
+      pong: this.pong.bind(this),
+      ping: this.ping.bind(this)
     };
-    this.processMsg = this.processMsg.bind(this);
 
     // Set some state on the session.
     this._waitingForConnect = true;
@@ -56,14 +47,15 @@ class Session {
 
   /**
    * Sends the given payload over the spark.
-   * @param {Object} payload The payload to send over the spark.
+   * @param {Object} payload The payload to send over the spark. This must be
+   *    EJSON serializable.
    */
   send(payload) {
     this.spark.write(payload);
   }
 
   /**
-   * @typedef {ConnectMessage}
+   * @typedef {Object} ConnectMessage
    * @property {String} msg The message type.
    * @property {String} version The DDP protocol version the client would like
    *    to use.
@@ -89,7 +81,6 @@ class Session {
     }
 
     if (msg.session) {
-      // TODO: log to the parent that this was an attempted reconnect.
       this._sessionId = msg.session;
     } else {
       this._sessionId = uuid.v4();
@@ -97,8 +88,8 @@ class Session {
 
     this._waitingForConnect = false;
     this.send({
-        msg: 'connected',
-        session: this._sessionId
+      msg: 'connected',
+      session: this._sessionId
     });
   }
 
@@ -110,7 +101,18 @@ class Session {
   }
 
   /**
-   * @typedef {SubMessage}
+   * Received a ping request from the client.
+   */
+  ping(msg) {
+    var resp = {
+      msg: 'pong'
+    };
+    if (msg.id) resp.id = msg.id;
+    this.send(resp);
+  }
+
+  /**
+   * @typedef {Object} SubMessage
    * @property {String} msg The message type.
    * @property {String} id The subscription ID (assigned by the client).
    * @property {String} name The name of the publication to subscribe to.
@@ -121,11 +123,18 @@ class Session {
    * Subscribes the client to the specified publication.
    * @param {SubMessage} msg The subscription message.
    */
-  subscribeWebSocket(msg) {
-    if (this._waitingForConnect) return;
+  subscribe(msg) {
+    if (this._waitingForConnect) {
+      this.send({
+        msg: 'error',
+        reason: 'connect-must-be-first',
+        offendingMsg: msg
+      });
+      return;
+    }
 
-    if (this._openSubscriptions[msg.id]) {
-      // This session already has an open subscription for desired publication.
+    if (this._subscriptions[msg.id]) {
+      // This subscription is already open.
       return;
     }
     
@@ -136,7 +145,8 @@ class Session {
     if (!handler) {
       this.send({
         msg: 'nosub',
-        id: msg.id
+        id: msg.id,
+        error: 'sub-not-found'
       });
       return;
     }
@@ -149,7 +159,7 @@ class Session {
       params,
       id: msg.id
     });
-    this._openSubscriptions[msg.id] = subscription;
+    this._subscriptions[msg.id] = subscription;
     subscription.start();
   }
 
@@ -163,23 +173,28 @@ class Session {
    * Unsubscribes the client from the desired publication.
    * @param {UnsubMessage} msg The unsubscribe message.
    */
-  unsubscribeWebSocket(msg) {
+  unsubscribe(msg) {
     if (this._waitingForConnect) return;
 
-    let sub = this._openSubscriptions[msg.id];
+    let sub = this._subscriptions[msg.id];
     if (!sub) {
       // No open subscription with the given name.
+      this.send({
+        msg: 'error',
+        reason: 'no-such-subscription-to-unsub',
+        offendingMessage: msg
+      });
       return;
     }
 
     sub.stop();
-    delete this._openSubscriptions[msg.id];
+    delete this._subscriptions[msg.id];
   }
 
   /**
    * Processes the next message.
    */
-  processMsg() {
+  processMsg(msg) {
     // If we're not running, return. We can't throw an error as it's possible
     // that we:
     //   - received a new message and enqueued it
@@ -189,78 +204,20 @@ class Session {
       return;
     }
 
-    var msg = this.msgQueue && this.msgQueue.shift();
-    if (!msg) {
-      // Meteor treats this as an error, is it though?
-      return;
-    }
-
-    // Find the correct handler, currently these can only be one of:
-    //  - connect
-    //  - sub
-    //  - unsub
+    // Find the correct handler if it exists.
     let handler = this.handlers[msg.msg];
     if (!handler) {
-      // DDP doesn't really have a generic way to return an error (i.e. for a
-      // message with an unknown type), so let's just swallow the error.
+      this.send({
+        msg: 'error',
+        reason: 'unknown-msg-type',
+        offendingMessage: msg
+      });
       return;
     }
 
     this._heartbeat.reset();
 
     handler(msg);
-  }
-
-  /**
-   * Sends an added message adding an object with the given `id` to the given
-   * `collection`.
-   *
-   * @param {String} collection The collection that the document is being added
-   *    to.
-   * @param {String} id The ID of the document being added.
-   * @param {Object} fields The fields that comprise the document being added.
-   */
-  added(collection, id, fields) {
-    this.send({
-      msg: 'added',
-      collection,
-      id,
-      fields
-    });
-  }
-
-  /**
-   * Sends a changed message changing the object with the given `id` in the
-   * given `collection`.
-   *
-   * @param {String} collection The collection that the document that is being
-   *    changed is a member of.
-   * @param {String} id The ID of the document being changed.
-   * @param {Object} fields The fields that have been changed.
-   */
-  changed(collection, id, fields) {
-    this.send({
-      msg: 'changed',
-      collection,
-      id,
-      fields
-    });
-  }
-
-  /**
-   * Sends a removed message removing the object with the given `id` from the
-   * given `collection`.
-   *
-   * @param {String} collection The collection that the document is being
-   *    removed from.
-   * @param {String} id The ID of the document being removed.
-   */
-  removed() {
-    this.send({
-      msg: 'removed',
-      collection,
-      id
-    });
   }
 
   /**
@@ -275,7 +232,7 @@ class Session {
     if (!this.isRunning) return;
     this.isRunning = false;
 
-    _.invoke(this._openSubscriptions, 'stop');
+    _.invoke(this._subscriptions, 'stop');
 
     this._heartbeat.stop();
     this.spark.end();
@@ -285,33 +242,28 @@ class Session {
    * Attaches the event handles to the WebSocket.
    */
   attachEventHandlers() {
-    let self = this,
-        spark = this.spark;
-    spark.on('end', () => {
-      self.stop();
+    this.spark.on('end', () => {
+      this.stop();
     });
 
-    spark.on('error', (err) => {
-      self.stop();
+    this.spark.on('error', (err) => {
+      this.stop();
     });
 
-    spark.on('data', (data) => {
-      try {
-        if (!data.msg) {
-          // If no msg type was sent, ignore it.
-          return;
-        }
-
-        // TODO: should this only done once we send the `connected` message?
-        // Safety belts for the race condition, where a bad client sends a
-        // message before we tell them that we're connected.
-        if (self._heartbeat) process.nextTick(self._heartbeat.reset);
-
-        self.msgQueue.push(data);
-        process.nextTick(self.processMsg);
-      } catch (err) {
-        // Log this error?
+    this.spark.on('data', (data) => {
+      if (!data.msg) {
+        // If no msg type was sent, ignore it.
+        this.send({
+          msg: 'error',
+          reason: 'must-provide-msg-type',
+          offendingMessage: msg
+        });
+        return;
       }
+
+      process.nextTick((msg) => {
+        this.processMsg(msg);
+      }, data);
     });
   }
 
