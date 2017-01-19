@@ -4,7 +4,6 @@ const Dequeue = require('double-ended-queue');
 const _ = require('underscore');
 const uuid = require('node-uuid');
 
-const Heartbeat = require('./heartbeat');
 const Subscription = require('./subscription');
 
 /**
@@ -39,10 +38,6 @@ class Session {
     this.isRunning = true;
     this.msgQueue = new Dequeue();
     this.attachEventHandlers();
-
-    // Start the heartbeat.
-    this._heartbeat = new Heartbeat({ session: this });
-    this._heartbeat.start();
   }
 
   /**
@@ -91,13 +86,6 @@ class Session {
       msg: 'connected',
       session: this._sessionId
     });
-  }
-
-  /**
-   * Received a reply pong from the client.
-   */
-  pong() {
-    this._heartbeat.reset();
   }
 
   /**
@@ -215,8 +203,6 @@ class Session {
       return;
     }
 
-    this._heartbeat.reset();
-
     handler(msg);
   }
 
@@ -224,7 +210,6 @@ class Session {
    * Stops the session. This includes (in the given order):
    *   - marking the session as no longer running
    *   - stopping all current subscriptions
-   *   - stops the heartbeat
    *   - closes the WebSocket
    */
   stop() {
@@ -234,7 +219,6 @@ class Session {
 
     _.invoke(this._subscriptions, 'stop');
 
-    this._heartbeat.stop();
     this.spark.end();
   }
 
@@ -265,14 +249,6 @@ class Session {
         this.processMsg(msg);
       }, data);
     });
-  }
-
-  /**
-   * Used by the heartbeat to stop the session if the connection is dead (the
-   * client isn't responding in a timely manner).
-   */
-  connectionIsDead() {
-    this.stop();
   }
 }
 
