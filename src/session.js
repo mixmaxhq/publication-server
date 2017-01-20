@@ -27,7 +27,6 @@ class Session {
       sub: this.subscribe.bind(this),
       unsub: this.unsubscribe.bind(this),
       connect: this.connect.bind(this),
-      pong: this.pong.bind(this),
       ping: this.ping.bind(this)
     };
 
