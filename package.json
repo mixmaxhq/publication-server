@@ -14,10 +14,10 @@
   "author": "Trey Tacon <trey@mixmax.com> (https://mixmax.com)",
   "license": "MIT",
   "dependencies": {
-    "ejson": "2.1.2",
-    "node-uuid": "1.4.7",
-    "primus": "6.0.8",
-    "underscore": "1.8.3",
-    "uws": "0.12.0"
+    "ejson": "^2.1.2",
+    "node-uuid": "^1.4.7",
+    "primus": "^6.0.8",
+    "underscore": "^1.8.3",
+    "uws": "^0.12.0"
   }
 }
