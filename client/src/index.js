@@ -55,6 +55,8 @@ class PublicationClient extends EventEmitter {
     });
     this._connect();
 
+    // When we reconnect, we need to mark ourselves as not connected, and we
+    // also need to re-subscribe to all of our publications.
     this._client.on('reconnected', () => {
       this._whenConnected = new Deferred();
       this._connect();
