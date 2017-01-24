@@ -2,7 +2,7 @@ publication-client
 =====
 
 This module provides a client side module for subscribing to publications from
-a [publication-server]().
+a [publication-server](https://github.com/mixmaxhq/publication-server).
 
 ## Installation
 ```
