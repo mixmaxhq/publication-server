@@ -8,7 +8,7 @@ var pkg = require('./package.json');
 
 export default {
   entry: 'src/index.js',
-  external: ['underscore', 'jquery'],
+  external: ['underscore'],
   plugins: [
     rootImport({
       useEntry: 'prepend',
@@ -16,11 +16,7 @@ export default {
       // should attempt the lack of extension only after it tries to resolve with the extension.
       extensions: ['.js', '']
     }),
-    nodeResolve({
-      // Needed in addition to the `external` definition to suppress `require('underscore')`
-      // https://github.com/rollup/rollup-plugin-node-resolve/issues/72.
-      skip: ['underscore']
-    }),
+    nodeResolve(),
     commonjs({
       include: ['node_modules/**'],
       namedExports: {

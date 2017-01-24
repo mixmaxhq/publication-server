@@ -105,7 +105,6 @@ class LocalCollection extends EventEmitter {
   toArray() {
     return _.values(this._docs);
   }
-
 }
 
 export default LocalCollection;

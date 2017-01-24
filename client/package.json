@@ -4,7 +4,8 @@
   "description": "A client for a publication-server",
   "browser": "dist/browser/index.js",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "build": "[ \"$WATCH\" == 'true' ] && rollup -cw || rollup -c",

@@ -1,14 +1,12 @@
 'use strict';
 
-import Primus from './primus';
 import _ from 'underscore';
-import $ from 'jquery';
 import EventEmitter from 'eventemitter3';
 
+import Deferred from './deferred';
 import LocalCollection from './localCollection';
+import Primus from './primus';
 import Subscription from './subscription';
-
-const Deferred = $.Deferred;
 
 /**
  * Returns the initial title case of the string, for example:
@@ -35,7 +33,9 @@ class PublicationClient extends EventEmitter {
    * @param {String} url The hostname of the publication provider as a URL.
    *    The provided protocol must be one of `https` or `http` (which
    *    correspond to the client using `wss` or `ws).
-   * @param {Object} options Configuration options.
+   * @param {Object} options Configuration options, these are passed through to
+   *    Primus so see for all options, please see:
+   *    https://github.com/primus/primus#connecting-from-the-browser.
    */
   constructor(url, options) {
     super();
@@ -46,9 +46,9 @@ class PublicationClient extends EventEmitter {
 
     this._whenConnected = new Deferred();
     
-    this._client = new Primus(url, options || {
+    this._client = new Primus(url, _.defaults(options, {
       strategy: 'offline,disconnected'
-    });
+    }));
 
     this._client.on('data', (message) => {
       this._handleMessage(message);
@@ -60,7 +60,7 @@ class PublicationClient extends EventEmitter {
     this._client.on('reconnected', () => {
       this._whenConnected = new Deferred();
       this._connect();
-      _.each(_.values(this._subscriptions), (sub) => {
+      _.each(this._subscriptions, (sub) => {
         sub._start();
       });
     });
@@ -129,10 +129,10 @@ class PublicationClient extends EventEmitter {
    * are passed as arguments to the publication.
    *
    * @param {String} name The publication to subscribe to.
+   * @param {*[]} params (optional) Params to pass to the publication.
    * @returns {Subscription} The subscription to the desired publication.
    */
-  subscribe(name) {
-    const params = _.rest(arguments);
+  subscribe(name, ...params) {
     const id = this._nextSubscriptionId++;
 
     // Hash the name and params to cache the subscription.
@@ -140,7 +140,7 @@ class PublicationClient extends EventEmitter {
     var subscription = this._subscriptions[subscriptionKey];
     if (!subscription) {
       subscription = this._subscriptions[subscriptionKey] = new Subscription(
-        id + '', name, params, this);
+        String(id), name, params, this);
     }
     return subscription;
   }

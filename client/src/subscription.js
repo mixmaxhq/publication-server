@@ -1,9 +1,7 @@
 'use strict';
 
 import _ from 'underscore';
-import $ from 'jquery';
-
-const Deferred = $.Deferred;
+import Deferred from './deferred';
 
 /**
  * A Subscription encapsulates the logic of subscribing to server side

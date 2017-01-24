@@ -64,48 +64,44 @@ class ReactiveQuery extends EventEmitter {
     this._collection = collection;
     this._selector = selector;
 
-    this._collection.on('added', this._onAdded.bind(this));
-    this._collection.on('changed', this._onChanged.bind(this));
-    this._collection.on('removed', this._onRemoved.bind(this));
-  }
+    /**
+     * Emits an added event if a document that was added to the LocalCollection
+     * that is this ReactiveQuery's source is a match for the query's filter.
+     *
+     * @param {Object} doc The added document.
+     */
+    this._collection.on('added', (doc) => {
+      if (isMatch(doc, this._selector)) {
+        // _fields_ should have all fields of the document excluding the `_id` field.
+        this.emit('added', doc._id, _.omit(doc, '_id'));
+      }
+    });
 
-  /**
-   * Emits an added event if a document that was added to the LocalCollection
-   * that is this ReactiveQuery's source is a match for the query's filter.
-   *
-   * @param {Object} doc The added document.
-   */
-  _onAdded(doc) {
-    if (isMatch(doc, this._selector)) {
-      // _fields_ should have all fields of the document excluding the `_id` field.
-      this.emit('added', doc._id, _.omit(doc, '_id'));
-    }
-  }
+    /**
+     * Emits a changed event if a document that was changed in the LocalCollection
+     * that is this ReactiveQuery's source is a match for the query's filter.
+     *
+     * @param {Object} doc The changed document.
+     * @param {Object} changeset The changed fields.
+     */
+    this._collection.on('changed', (doc, changeset) => {
+      if (isMatch(doc, this._selector)) {
+        this.emit('changed', doc._id, changeset);
+      }
+    });
 
-  /**
-   * Emits a changed event if a document that was changed in the LocalCollection
-   * that is this ReactiveQuery's source is a match for the query's filter.
-   *
-   * @param {Object} doc The changed document.
-   * @param {Object} changeset The changed fields.
-   */
-  _onChanged(doc, changeset) {
-    if (isMatch(doc, this._selector)) {
-      this.emit('changed', doc._id, changeset);
-    }
-  }
-
-  /**
-   * Emits a removed event if a document that was removed from the
-   * LocalCollection that is this ReactiveQuery's source is a match for the
-   * query's filter.
-   *
-   * @param {Object} doc The removed document.
-   */
-  _onRemoved(doc) {
-    if (isMatch(doc, this._selector)) {
-      this.emit('removed', doc._id);
-    }
+    /**
+     * Emits a removed event if a document that was removed from the
+     * LocalCollection that is this ReactiveQuery's source is a match for the
+     * query's filter.
+     *
+     * @param {Object} doc The removed document.
+     */
+    this._collection.on('removed', (doc) => {
+      if (isMatch(doc, this._selector)) {
+        this.emit('removed', doc._id);
+      }
+    });
   }
 
   /**
