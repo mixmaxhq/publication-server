@@ -3,7 +3,8 @@
 import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
 
-import ReactiveQuery from './reactiveQuery';
+import ReactiveQuery from './ReactiveQuery';
+import { expandKeys, deepExtend } from './utils';
 
 /**
  * A LocalCollection is a collection of documents held in the browser. It
@@ -51,8 +52,8 @@ class LocalCollection extends EventEmitter {
       throw new Error('Document has been changed without having been added!');
     }
 
-    var expandedFields = _.expandKeys(fields);
-    doc = this._docs[id] = _.chain(doc).deepExtend(expandedFields).omit(cleared).value();
+    var expandedFields = expandKeys(fields);
+    doc = this._docs[id] = _.omit(deepExtend(doc, expandedFields), cleared);
 
     var changeset = _.clone(expandedFields);
 
@@ -60,10 +61,10 @@ class LocalCollection extends EventEmitter {
       // Perform an expansion and deep merge of cleared, if it exists.
       var clearedObj = _.chain(cleared)
         .object(_.times(cleared.length, _.constant(undefined)))
-        .expandKeys()
+        .map(expandKeys)
         .value();
       // Note that the changeset might be empty because `fields` wasn't set.
-      changeset = _.deepExtend(changeset || {}, clearedObj);
+      changeset = deepExtend(changeset || {}, clearedObj);
     }
     this.emit('changed', doc, changeset);
   }

@@ -2,49 +2,8 @@
 
 import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
+import { isMatch } from './utils';
 
-/**
- * isMatch evaluates whether the give doc matches the given selector.
- * Copied from _.isMatch: https://github.com/jashkenas/underscore/blob/master/underscore.js#L1144
- * and modified to support `$elemMatch`.
- * @param  {[type]} doc      [description]
- * @param  {[type]} selector [description]
- * @return {[type]}          [description]
- */
-function isMatch(doc, selector) {
-  var keys = _.keys(selector),
-      length = keys.length;
-  if (doc === null) return !length;
-  var obj = Object(doc);
-  for (var i = 0; i < length; i++) {
-    var key = keys[i];
-    // If the value (selector[key]) is an Object and the corresponding value
-    // in the doc is an array, we might be looking at a usage of $elemMatch.
-    // So check if the only key in selector[key] is `$elemMatch` and then
-    // recursively check the selector passed to `$elemMatch` against each
-    // value in the corresponding array in the target object. If a single one
-    // matches, continue on with the query matching/checking.
-    if (_.isObject(selector[key]) && _.isArray(obj[key])) {
-      var objKeys = _.keys(selector[key]);
-      if (objKeys.length === 1 && objKeys[0] === '$elemMatch') {
-        var arrayVals = obj[key],
-            elemMatchQuery = selector[key].$elemMatch,
-            foundMatch = false;
-        for (var j = 0; j < arrayVals.length; j++) {
-          if (isMatch(arrayVals[j], elemMatchQuery)) {
-            foundMatch = true;
-            break;
-          }
-        }
-        if (!foundMatch) return false;
-        // We found a match, so continue on.
-        continue;
-      }
-    }
-    if (selector[key] !== obj[key] || !(key in obj)) return false;
-  }
-  return true;
-}
 
 /**
  * Creates a reactive query which will emit 'added', 'changed', and 'removed'
@@ -61,6 +20,7 @@ class ReactiveQuery extends EventEmitter {
    *    in the collection.
    */
   constructor(collection, selector) {
+    super();
     this._collection = collection;
     this._selector = selector;
 

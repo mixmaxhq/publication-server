@@ -4,9 +4,9 @@ import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
 
 import Deferred from './deferred';
-import LocalCollection from './localCollection';
-import Primus from './primus';
-import Subscription from './subscription';
+import LocalCollection from './LocalCollection';
+import Primus from './Primus';
+import Subscription from './Subscription';
 
 /**
  * Returns the initial title case of the string, for example:
