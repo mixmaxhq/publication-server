@@ -37,12 +37,25 @@ var client = new PublicationClient(`https://testing.domain.com?foo=bar`);
 
 #### Checking connection state
 
-The publication client exposes a promise that can be used to know when a client
-has successfully connected.
+The publication client emits a `connected` event once it has successfully
+connected.
 
 ```js
-client.whenConnected().then(() => {
+client.once('connected', () => {
   console.log('connected successfully!');
+});
+```
+
+It also emits `disconnected` event as soon as it becomes disconnected, and
+will emit a `connected` event if it is able to successfully connect to the
+publication server again.
+```js
+client.on('disconnected', () => {
+  console.log('Oh no! Our connection is gone!');
+
+  client.once('connected', () => {
+    console.log('Phew! We have a new connection again!');
+  });
 });
 ```
 
@@ -58,13 +71,29 @@ client.subscribe('hello', {
 });
 ```
 
-Subscriptions also can be queried for 'readiness':
+Subscriptions also can be queried for 'readiness'. They can return a Promise
+via the `whenReady` function, and also emit a `ready` event.
 
 ```js
 client.subscribe('foo').whenReady().then(() => {
   console.log('subscription is ready!');
 });
 ```
+
+#### Waiting on initial subscriptions to load
+`whenReady` is provided as a convenience function if you want to be able to
+wait for a single subscription or for multiple subscriptions to complete
+before performing some action. For example:
+
+```js
+var sub0 = client.subscribe('sub0'),
+    sub1 = client.subscribe('sub1'),
+    sub2 = client.subscribe('sub2');
+Promise.all(_.invoke([sub0, sub1, sub2], 'whenReady')).then(() => {
+  console.log('Our initial subscriptions are all ready!');
+});
+
+``
 
 ### Querying collections
 
