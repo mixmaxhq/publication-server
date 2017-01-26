@@ -92,8 +92,27 @@ var sub0 = client.subscribe('sub0'),
 Promise.all(_.invoke([sub0, sub1, sub2], 'whenReady')).then(() => {
   console.log('Our initial subscriptions are all ready!');
 });
+```
 
-``
+#### Subscription "readiness" after disconnection
+When the client reconnects to the server after being disconnected, the
+subscription will reset - meaning that `whenReady` can be queried once again
+to know when the subscription is ready.
+
+The reason we do this is to allow a consumer to know about the updated state of
+a subscription after a connection has been broken/down for a long period of
+time (i.e. a user closed their laptop and re-opened it later). This is
+necessary because if a connection is down for a significant period of time, we
+could have missed a very large number of additions, changes and removals to any
+local collections that our subscription populates. As such, all local
+collections are cleared of any documents upon reconnection (so that we can
+ensure that they are then updated with the appropriate state). Another benefit
+of this approach is that any pre-exising reactive queries on local collection
+do not need to be re-created, they will still function as desired.
+
+Note that similarly to how a subscription emits `ready` when it is ready, after
+the client has been disconnected and a subscription is ready after
+re-subscription, it will again emit a `ready` event.
 
 ### Querying collections
 

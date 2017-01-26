@@ -42,9 +42,10 @@ class PublicationClient extends EventEmitter {
     this._subscriptions = {};
     this._nextSubscriptionId = 0;
     this._collections = {};
+    this._isConnected = false;
     
     this._client = new Primus(url, _.defaults(options, {
-      strategy: 'offline,disconnected'
+      strategy: ['online', 'disconnect']
     }));
 
     this._client.on('data', (message) => {
@@ -216,6 +217,16 @@ class PublicationClient extends EventEmitter {
 
     var collection = this.getCollection(collectionName);
     collection._onRemoved(id);
+  }
+
+  /**
+   * Returns true if the client is currently connected to the server, false if
+   * it is not.
+   *
+   * @returns {Boolean} Whether the client is connected to the server or not.
+   */ 
+  get isConnected() {
+    return this._isConnected;
   }
 }
 
