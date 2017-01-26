@@ -106,6 +106,14 @@ class LocalCollection extends EventEmitter {
   toArray() {
     return _.values(this._docs);
   }
+
+  /**
+   * Drops all currently known documents.
+   */
+  _clear() {
+    this.emit('cleared');
+    this._docs = {};
+  }
 }
 
 export default LocalCollection;

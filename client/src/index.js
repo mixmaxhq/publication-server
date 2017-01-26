@@ -55,6 +55,18 @@ class PublicationClient extends EventEmitter {
     // When we reconnect, we need to mark ourselves as not connected, and we
     // also need to re-subscribe to all of our publications.
     this._client.on('reconnected', () => {
+      // Now that we're reconnected again, drop all local collections. We have
+      // to do this because we don't know what updates we may have missed while
+      // we've been disconnected (i.e. we could have missed `removed` events).
+      // The reason that we drop the collections upon reconnection is that it
+      // allows the local collections to be used/relied upon while we're
+      // disconnected so that no consumers think we've suddenly dropped
+      // everything the moment the connection drops. Also, instead of dropping
+      // every collection, we use an private method to tell the collections to
+      // drop all documents - this means pre-existing ReactiveQueries aren't
+      // left dangling.
+      _.invoke(this._collections, '_clear');
+
       this._connect();
       _.each(this._subscriptions, (sub) => {
         sub._start();
