@@ -1,0 +1,34 @@
+{
+  "name": "publication-client",
+  "version": "0.0.0",
+  "description": "A client for a publication-server",
+  "main": "dist/browser/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "[ \"$WATCH\" == 'true' ] && rollup -cw || rollup -c",
+    "watch": "WATCH=true npm run build",
+    "test": "JASMINE_CONFIG_PATH='spec/node/support/jasmine.json' jasmine",
+    "prebuild": "rm -rf dist",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mixmaxhq/publication-server.git"
+  },
+  "author": "Trey Tacon <trey@mixmax.com> (https://mixmax.com)",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "eventemitter3": "^2.0.2"
+  },
+  "devDependencies": {
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-es2015": "^6.22.0",
+    "rollup": "^0.41.4",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^7.0.0",
+    "rollup-plugin-node-resolve": "^2.0.0"
+  }
+}
