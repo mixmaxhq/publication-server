@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from 'underscore';
-import Deferred from './deferred';
+import EventEmitter from 'eventemitter3';
 
 /**
  * A Subscription encapsulates the logic of subscribing to server side
@@ -9,7 +9,7 @@ import Deferred from './deferred';
  * publication is `ready` (has returned its initial state).
  *
  */
-class Subscription {
+class Subscription extends EventEmitter {
   /**
    * Creates a new subscription with the given ID to the publication
    * defined my the given name and provided the given parameters.
@@ -22,10 +22,10 @@ class Subscription {
    * @param {Object} conn The connection to the publication provider.
    */
   constructor(id, name, params, conn) {
+    super();
+
     this._id = id;
     this._connection = conn;
-    this._readyDeferred = new Deferred();
-
     this._name = name;
     this._params = params;
 
@@ -38,16 +38,27 @@ class Subscription {
    * connection is ready.
    */
   _start() {
-    this._connection.whenConnected().then(() => {
-      this._connection._send({
-        msg: 'sub',
-        id: this._id,
-        name: this._name,
-        params: this._params
+    if (this._connection._isConnected) {
+      this._sendSubMsg();
+    } else {
+      this._connection.once('connected', () => {
+        this._sendSubMsg();
       });
+    }
+  }
 
-      this._connection.on('ready', this._boundOnReady);
+  /**
+   * Sends the `sub` message to the publication-server and begins listening
+   * for the publication-server to tell us that our subscription is `ready`.
+   */
+  _sendSubMsg() {
+    this._connection._send({
+      msg: 'sub',
+      id: this._id,
+      name: this._name,
+      params: this._params
     });
+    this._connection.on('ready', this._boundOnReady);
   }
 
   /**
@@ -68,7 +79,10 @@ class Subscription {
    *    to be used.
    */
   whenReady() {
-    return this._readyDeferred;
+    return new Promise((resolve) => {
+      return this._connection._isConnected ?
+        resolve() : this.once('ready', resolve);
+    });
   }
 
   /**
@@ -78,7 +92,7 @@ class Subscription {
   _onReady(msg) {
     const readySubs = msg.subs;
     if (_.contains(readySubs, this._id)) {
-      this._readyDeferred.resolve();
+      this.emit('ready');
       this._connection.removeListener('ready', this._boundOnReady);
     }
   }

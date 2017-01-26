@@ -58,11 +58,17 @@ class PublicationClient extends EventEmitter {
     // When we reconnect, we need to mark ourselves as not connected, and we
     // also need to re-subscribe to all of our publications.
     this._client.on('reconnected', () => {
-      this._whenConnected = new Deferred();
       this._connect();
       _.each(this._subscriptions, (sub) => {
         sub._start();
       });
+    });
+
+    // This event is purely a way for Primus to tell us that it's going to try
+    // to reconnect.
+    this._client.on('reconnect', () => {
+      if (this._isConnected) this.emit('disconnected');
+      this._isConnected = false;
     });
   }
 
@@ -81,7 +87,8 @@ class PublicationClient extends EventEmitter {
       this[`_on${initialTitleCase(msg.msg)}`](msg);
       break;
     case 'connected':
-      this._whenConnected.resolve();
+      this._isConnected = true;
+      this.emit('connected');
       break;
     case 'ready':
       this.emit('ready', msg);
