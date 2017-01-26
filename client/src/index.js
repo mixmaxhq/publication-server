@@ -3,7 +3,6 @@
 import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
 
-import Deferred from './deferred';
 import LocalCollection from './LocalCollection';
 import Primus from './Primus';
 import Subscription from './Subscription';
@@ -43,8 +42,6 @@ class PublicationClient extends EventEmitter {
     this._subscriptions = {};
     this._nextSubscriptionId = 0;
     this._collections = {};
-
-    this._whenConnected = new Deferred();
     
     this._client = new Primus(url, _.defaults(options, {
       strategy: 'offline,disconnected'
