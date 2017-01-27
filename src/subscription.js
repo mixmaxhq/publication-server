@@ -92,6 +92,13 @@ class Subscription {
     }, this._params);
   }
 
+  /**
+   * Passes the error and any other pertinent information to the registered
+   * error handler, and also publishes a `nosub` message to the client to
+   * inform them of the error.
+   *
+   * @param {Error} err The error that was encountered in the publication.
+   */
   error(err) {
     this._session.server._errHandler(new PublicationError(err, {
       userId: this._session.userId,
