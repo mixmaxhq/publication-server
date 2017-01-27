@@ -16,6 +16,8 @@ class PublicationServer {
    *
    * @param {Function} authFn The function for authenticating connections.
    * @param {String} mountPath The URL to mount the listener on.
+   * @param {Function} errHandler An error handler to pass publication errors
+   *    to.
    * @param {Object} server The HTTP server to allow Primus to listen on.
    */
   constructor({authFn, mountPath, errHandler, server} = {}) {

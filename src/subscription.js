@@ -103,6 +103,7 @@ class Subscription {
     this._session.server._errHandler(new PublicationError(err, {
       userId: this._session.userId,
       extra: {
+        name: this._name,
         params: this._params
       }
     }));
