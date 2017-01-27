@@ -94,4 +94,4 @@ objects with there properties:
 
 ### Client
 
-See [@mixmaxhq/publication-client](https://github.com/mixmaxhq/publication-server/blob/master/client/README.md) for the client for this server.
+See [publication-client](https://github.com/mixmaxhq/publication-server/blob/master/client/README.md) for the client for this server.
