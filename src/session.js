@@ -122,7 +122,7 @@ class Session {
       // This subscription is already open.
       return;
     }
-    
+
     const name = msg.name;
     const params = msg.params;
     const handler = this.server._subscriptions[name];

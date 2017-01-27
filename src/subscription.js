@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('underscore');
+const PublicationError = require('./PublicationError');
 
 /**
  * Represents a subscription to a publication for a Session.
@@ -86,8 +87,26 @@ class Subscription {
         });
       },
       onStop: this.onStop.bind(this),
-      ready: this.ready.bind(this)
+      ready: this.ready.bind(this),
+      error: this.error.bind(this)
     }, this._params);
+  }
+
+  error(err) {
+    this._session.server._errHandler(new PublicationError(err, {
+      userId: this._session.userId,
+      extra: {
+        params: this._params
+      }
+    }));
+    this._session.send({
+      msg: 'nosub',
+      id: this._id,
+      error: {
+        error: err.message || '',
+        message: 'Failed to start subscription'
+      }
+    });
   }
 
   /**

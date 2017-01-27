@@ -18,10 +18,11 @@ class PublicationServer {
    * @param {String} mountPath The URL to mount the listener on.
    * @param {Object} server The HTTP server to allow Primus to listen on.
    */
-  constructor({authFn, mountPath, server} = {}) {
+  constructor({authFn, mountPath, errHandler, server} = {}) {
     this._subscriptions = {};
     this._authFn = authFn;
     this._mountPath = mountPath;
+    this._errHandler = errHandler;
 
     this._primus = new Primus(server, {
       authorization: this._authFn,
