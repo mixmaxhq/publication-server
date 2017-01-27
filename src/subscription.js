@@ -79,7 +79,7 @@ class Subscription {
        *    removed from.
        * @param {String} id The ID of the document being removed.
        */
-      removed(collection, id) {
+      removed: (collection, id) => {
         this._session.send({
           msg: 'removed',
           collection,
