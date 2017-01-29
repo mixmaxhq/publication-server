@@ -60,7 +60,7 @@ class PublicationServer {
    */
   shutdown(timeout) {
     this._primus.destroy({
-      // Don't force the HTTP server by default, that's not our job.
+      // Don't force the HTTP server to close by default, that's not our job.
       close: false,
       timeout
     });
