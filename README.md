@@ -32,25 +32,40 @@ server.listen(process.env.PORT || '8080');
 #### Authentication function
 
 One plus of this server is that it can authenticate WebSocket requests via the
-headers on the initial `UPGRADE` request. This is done in the authentication
-function that is passed to the `publication-server` constructor. The function
-should be as follows:
+headers on the initial `UPGRADE` request. This is done in the *REQUIRED*
+authentication function that is passed to the `publication-server` constructor.
+This authentication function takes two parameters which are the originating HTTP
+`UPGRADE` request and a callback. The callback has the following signature:
+
+```js
+/**
+ * This callback is called to signal that we've either authenticated the
+ * incoming HTTP UPGRADE request or we've rejected it.
+ *
+ * @param {Error} err The error that we've returned to signify why the user
+ *    failed authentication. If `err` is null we've successfully authenticated
+ *    the incoming connection to upgrade into a WebSocket.
+ * @param {String} userId An optional unique tag to identify a user by. It is
+ *    exposed inside of publications at `this.userId`. Some publications may
+ *    not require this value, which is why it is optional to return, although
+ *    it is highly encouraged to return a `userId` to be set.
+ */
+function done (err, userId) {}
+```
+
+The authorization function would have the following flow then:
 
 ```js
 function authenticationFunction(req, done) {
   // Logic checking the websocket headers, etc.
+  // ...
 
   // If the request failed authentication, return an error.
-  if (failedAuth) done(new Error('failed to authenticate user'));
+  if (failedAuth) process.nextTick(done, new Error('failed to authenticate user'));
 
-  // NOTE: you need to set a property called `userId` on the request object if
-  // you would like to reference it inside of any given publication. This is
-  // not required, but it is suggested to do.
-  req.userId = user._id;
-
-  // If the request passed authentication, call the callback without any
-  // params.
-  done();
+  // If the request passed authentication, call the callback with the the ID
+  // of the user that we've authenticated.
+  process.nextTick(done, null, `SUPERUSER$12345`);
 }
 ```
 
