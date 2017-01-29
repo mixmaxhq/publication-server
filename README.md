@@ -130,3 +130,8 @@ pubSub.shutdown(10000);
 ### Client
 
 See [publication-client](https://github.com/mixmaxhq/publication-server/blob/master/client/README.md) for the client for this server.
+
+
+### Changelog
+* 1.1.0 Alter how we wrap the authentication function and make it required.
+* 1.0.0 Initial release of server and client
