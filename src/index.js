@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('underscore');
+const assert = require('assert');
 const Primus = require('primus');
 
 const Session = require('./session');
@@ -21,8 +22,16 @@ class PublicationServer {
    * @param {Object} server The HTTP server to allow Primus to listen on.
    */
   constructor({authFn, mountPath, errHandler, server} = {}) {
+    assert(authFn, 'Must provide an authorization function');
+
     this._subscriptions = {};
-    this._authFn = authFn;
+    this._authFn = (req, done) => {
+      authFn(req, (err, userId) => {
+        // Make the userId available to the session and any publications.
+        req.userId = userId;
+        done(err);
+      });
+    };
     this._mountPath = mountPath;
     this._errHandler = errHandler;
 
