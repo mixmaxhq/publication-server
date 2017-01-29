@@ -51,6 +51,20 @@ class PublicationServer {
 
     this._subscriptions[name] = func;
   }
+
+  /**
+   * Gracefully shutdowns the publication server.
+   *
+   * @param {Number} timeout The amount of time we'll give the WebSocket server
+   * to gracefully shutdown.
+   */
+  shutdown(timeout) {
+    this._primus.destroy({
+      // Don't force the HTTP server by default, that's not our job.
+      close: false,
+      timeout
+    });
+  }
 }
 
 module.exports = PublicationServer;
