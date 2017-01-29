@@ -32,17 +32,25 @@ server.listen(process.env.PORT || '8080');
 #### Authentication function
 
 One plus of this server is that it can authenticate WebSocket requests via the
-headers on the request. This is done in the authentication function that is
-passed to the `publication-server` constructor. The function should be as
-follows:
+headers on the initial `UPGRADE` request. This is done in the authentication
+function that is passed to the `publication-server` constructor. The function
+should be as follows:
 
 ```js
-function authenticationFunction(ws, done) {
+function authenticationFunction(req, done) {
   // Logic checking the websocket headers, etc.
-  // ...
-  // We get the ID of the user that this connection is for as a String.
 
-  done(null, userId);
+  // If the request failed authentication, return an error.
+  if (failedAuth) done(new Error('failed to authenticate user'));
+
+  // NOTE: you need to set a property called `userId` on the request object if
+  // you would like to reference it inside of any given publication. This is
+  // not required, but it is suggested to do.
+  req.userId = user._id;
+
+  // If the request passed authentication, call the callback without any
+  // params.
+  done();
 }
 ```
 
