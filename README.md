@@ -100,6 +100,18 @@ objects with there properties:
  - `extra`: Any extra information that was recorded - currently this is the
    parameters that were provided to the publication.
 
+### Gracefully shutting down
+The publication server also exposes a `shutdown` function which accepts an
+optional timeout, within which it is expected to close all current websocket
+connections. The timeout within which to gracefully shutdown defaults to zero
+if none is provided. Also note that the unit is in milliseconds. As an example:
+
+```js
+// This gives the server 10 seconds to gracefully shutdown.
+pubSub.shutdown(10000);
+```
+
+
 ### Client
 
 See [publication-client](https://github.com/mixmaxhq/publication-server/blob/master/client/README.md) for the client for this server.
