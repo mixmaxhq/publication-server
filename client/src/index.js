@@ -228,6 +228,13 @@ class PublicationClient extends EventEmitter {
   get isConnected() {
     return this._isConnected;
   }
+
+  /**
+   * Allows the user to close the connection.
+   */
+  stop() {
+    this._client.end();
+  }
 }
 
 export default PublicationClient;

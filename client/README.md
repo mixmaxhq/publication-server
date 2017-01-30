@@ -151,3 +151,12 @@ client.getCollection('baz').find({
 
 Note that the handlers for these events are the same as those for
 [Meteor's Mongo.Cursor.observeChanges](https://docs.meteor.com/api/collections.html#Mongo-Cursor-observeChanges) (specifically the added, changed and removed events).
+
+### Closing the connection
+If for whatever need, you need to close the publication connection, simply use
+the `stop()` method. Note that once you do this you, you'll need to recreate an
+entirely new publication-client to reconnect.
+
+```js
+client.stop();
+```
