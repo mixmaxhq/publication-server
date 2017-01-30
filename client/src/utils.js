@@ -86,7 +86,7 @@ function expandKeys(object) {
  */
 function deepExtend(target, source) {
   _.each(source, function(value, key) {
-    if (_.has(target, key) && ObjectUtils.isPlainObject(target[key]) && ObjectUtils.isPlainObject(source[key])) {
+    if (_.has(target, key) && isObject(target[key]) && isObject(source[key])) {
       deepExtend(target[key], source[key]);
     } else {
       target[key] = source[key];
