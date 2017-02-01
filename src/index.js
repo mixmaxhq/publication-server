@@ -65,14 +65,18 @@ class PublicationServer {
    * Gracefully shutdowns the publication server.
    *
    * @param {Number} timeout The amount of time we'll give the WebSocket server
-   * to gracefully shutdown.
+   *    to gracefully shutdown.
+   * @param {Object} options Any shutdown options that you'd like to pass when
+   *    shutting the server down. These are passed through to the Primus
+   *    instance, so see https://github.com/primus/primus#destruction for
+   *    details.
    */
-  shutdown(timeout) {
-    this._primus.destroy({
+  shutdown(timeout, options) {
+    this._primus.destroy(_.defaults(options, {
       // Don't force the HTTP server to close by default, that's not our job.
       close: false,
       timeout
-    });
+    }));
   }
 }
 
