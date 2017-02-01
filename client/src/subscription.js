@@ -28,6 +28,7 @@ class Subscription extends EventEmitter {
     this._connection = conn;
     this._name = name;
     this._params = params;
+    this._isReady = false;
 
     this._boundOnReady = this._onReady.bind(this);
     this._start();
@@ -80,7 +81,7 @@ class Subscription extends EventEmitter {
    */
   whenReady() {
     return new Promise((resolve) => {
-      return this._connection._isConnected ?
+      return this._connection._isConnected && this._isReady ?
         resolve() : this.once('ready', resolve);
     });
   }
@@ -92,6 +93,7 @@ class Subscription extends EventEmitter {
   _onReady(msg) {
     const readySubs = msg.subs;
     if (_.contains(readySubs, this._id)) {
+      this._isReady = true;
       this.emit('ready');
       this._connection.removeListener('ready', this._boundOnReady);
     }
