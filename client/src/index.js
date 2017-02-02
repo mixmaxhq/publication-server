@@ -103,6 +103,9 @@ class PublicationClient extends EventEmitter {
     case 'ready':
       this.emit('ready', msg);
       break;
+    default:
+      this.emit(msg.msg, msg);
+      break;
     }
   }
 
