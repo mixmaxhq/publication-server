@@ -62,6 +62,15 @@ class PublicationServer {
   }
 
   /**
+   * Broadcast a message to all connected clients.
+   *
+   * @param {Object} msg The message to send to all connected clients.
+   */
+  broadcast(msg) {
+    this._primus.write(msg);
+  }
+
+  /**
    * Gracefully shutdowns the publication server.
    *
    * @param {Number} timeout The amount of time we'll give the WebSocket server
