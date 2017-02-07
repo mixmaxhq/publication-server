@@ -29,9 +29,21 @@ class Subscription {
   }
 
   /**
-   * Starts the publication.
+   * Starts the publication so that it can handle any errors thrown by it
+   * initially.
    */
   start() {
+    try {
+      this._start();
+    } catch (err) {
+      this.error(err);
+    }
+  }
+
+  /**
+   * Starts the publication.
+   */
+  _start() {
     this._handler.apply({
       userId: this._session.userId,
 
