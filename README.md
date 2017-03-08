@@ -133,5 +133,12 @@ See [publication-client](https://github.com/mixmaxhq/publication-server/blob/mas
 
 
 ### Changelog
+* 1.4.3 Delete subscription references client side when we unsubscribe from a publication.
+* 1.4.2 Fix typo with unsubscribe message.
+* 1.4.1 Handle subscription initialization errors.
+* 1.4.0 Handle custom event broadcasting (for shutdown message specifically).
+* 1.3.0 All shutdown options to be passed through to Primus.
+* 1.2.1 Enforce message ordering to the client.
+* 1.1.1 Fix bad ObjectUtils reference.
 * 1.1.0 Alter how we wrap the authentication function and make it required.
 * 1.0.0 Initial release of server and client
