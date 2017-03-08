@@ -70,6 +70,8 @@ class Subscription extends EventEmitter {
       msg: 'unsub',
       id: this._id
     });
+    this._connection._removeSubscription(
+      JSON.stringify([this._name].concat(this._params)));
   }
 
   /**
