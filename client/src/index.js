@@ -43,7 +43,7 @@ class PublicationClient extends EventEmitter {
     this._nextSubscriptionId = 0;
     this._collections = {};
     this._isConnected = false;
-    
+
     this._client = new Primus(url, _.defaults(options, {
       strategy: ['online', 'disconnect']
     }));
@@ -172,6 +172,17 @@ class PublicationClient extends EventEmitter {
    */
   _send(msg) {
     this._client.write(msg);
+  }
+
+  /**
+   * Removes the subscription from the current session. This is called
+   * internally when a subscription is `stop()`ped.
+   *
+   * @param {String} subKey The subscription key that is unique to the
+   *    subscription (generated from the name and parameters).
+   */
+  _removeSubscription(subKey) {
+    delete this._subscriptions[subKey];
   }
 
   /**
