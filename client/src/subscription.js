@@ -68,7 +68,7 @@ class Subscription extends EventEmitter {
   stop() {
     this._connection._send({
       msg: 'unsub',
-      id: id
+      id: this._id
     });
   }
 
