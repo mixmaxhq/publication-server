@@ -73,6 +73,7 @@ class Subscription extends EventEmitter {
   stop() {
     if (this._isStopped || !this._isReady) return;
 
+    this._isStopped = true;
     this._connection._send({
       msg: 'unsub',
       id: this._id
