@@ -30,9 +30,11 @@ class Subscription extends EventEmitter {
     this._params = params;
     this._isReady = false;
     this._isFailed = false;
+    this._isStopped = false;
 
     this._boundOnReady = this._onReady.bind(this);
     this._boundOnNoSub = this._onNoSub.bind(this);
+    this._boundOnNoSubPostInit = this._onNoSubPostInitialization.bind(this);
     this._start();
   }
 
@@ -69,7 +71,7 @@ class Subscription extends EventEmitter {
    * Stops the subscription by unsubscribing from the publication provider.
    */
   stop() {
-    if (!this._isReady) return;
+    if (this._isStopped || !this._isReady) return;
 
     this._connection._send({
       msg: 'unsub',
@@ -115,12 +117,12 @@ class Subscription extends EventEmitter {
    */
   _onReady(msg) {
     const readySubs = msg.subs;
-    if (_.contains(readySubs, this._id)) {
-      this._isReady = true;
-      this.emit('ready');
-      this._connection.removeListener('ready', this._boundOnReady);
-      this._connection.removeListener('nosub', this._boundOnNoSub);
-    }
+    if (!_.contains(readySubs, this._id)) return;
+
+    this._isReady = true;
+    this.emit('ready');
+
+    this._updateListenersForPostSetup();
   }
 
   /**
@@ -133,20 +135,49 @@ class Subscription extends EventEmitter {
     if (msg.id !== this._id) return;
 
     this._isFailed = true;
-    // If the error was simply that the subscription wasn't found, the `error`
-    // field will simple be `sub-not-found`.
-    let err = msg.error;
-    if (_.isObject(err)) {
-      // If the error was an error that occurred during subscription
-      // initialization though, the `error` field will be an object with the
-      // top level error message as a nested field on the object keyed by
-      // `error`.
-      err = err.error;
-    }
-    this._initializationError = new Error(err);
-    this.emit('nosub', this._initializationError);
+    let err = this._extractErr(msg.error);
+    this._initializationError = err;
+    this.emit('nosub', err);
+
+    this._updateListenersForPostSetup();
+  }
+
+  /**
+   * Remove the initial listeners for `ready` and `nosub`, and add a listener
+   * for post-setup `nosub` errors.
+   */
+  _updateListenersForPostSetup() {
     this._connection.removeListener('ready', this._boundOnReady);
     this._connection.removeListener('nosub', this._boundOnNoSub);
+
+    this._connection.on('nosub', this._boundOnNoSubPostInit);
+  }
+
+  /**
+   * Emits the error that the `nosub` message contained, if the`nosub`
+   * message was for this subscription.
+   *
+   * @param {Object} msg The received `nosub` message.
+   */
+  _onNoSubPostInitialization(msg) {
+    if (msg.id !== this._id) return;
+
+    this.emit('nosub', this._extractErr(msg.error));
+  }
+
+  /**
+   * If the error was simply that the subscription wasn't found, the `err`
+   * will simple be `sub-not-found`. However, if the error was an error
+   * that occurred during subscription initialization, `err` will be an
+   * object with the top level error message as a field on the object under
+   * the key `error`.
+   *
+   * @param {String|Object} err The error returned in a `nosub` message.
+   * @returns {Error} An error object wrapping the returned error.
+   */
+  _extractErr(err) {
+    if (_.isObject(err)) err = err.error;
+    return new Error(err);
   }
 }
 
