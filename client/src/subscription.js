@@ -89,8 +89,12 @@ class Subscription extends EventEmitter {
   whenReady() {
     return new Promise((resolve, reject) => {
       if (this._isFailed) {
-        reject();
+        // We automatically reject if we failed to initialize the subscription.
+        reject(this._initializationError);
       } else if (this._isReady) {
+        // If the subscription did become `ready`, regardless of if we later
+        // received an error, still automatically mark the subscription as
+        // ready since it originally was.
         resolve();
       } else {
         this.once('ready', () => {
@@ -139,7 +143,8 @@ class Subscription extends EventEmitter {
       // `error`.
       err = err.error;
     }
-    this.emit('nosub', new Error(err));
+    this._initializationError = new Error(err);
+    this.emit('nosub', this._initializationError);
     this._connection.removeListener('ready', this._boundOnReady);
     this._connection.removeListener('nosub', this._boundOnNoSub);
   }
