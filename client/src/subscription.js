@@ -69,6 +69,8 @@ class Subscription extends EventEmitter {
    * Stops the subscription by unsubscribing from the publication provider.
    */
   stop() {
+    if (!this._isReady) return;
+
     this._connection._send({
       msg: 'unsub',
       id: this._id
@@ -95,9 +97,9 @@ class Subscription extends EventEmitter {
           this.removeListener('nosub');
           resolve();
         });
-        this.once('nosub', () => {
+        this.once('nosub', (err) => {
           this.removeListener('ready');
-          reject();
+          reject(err);
         });
       }
     });
@@ -118,7 +120,8 @@ class Subscription extends EventEmitter {
   }
 
   /**
-   * Marks the subscription as non-existent and removes any local listeners.
+   * Marks the subscription as non-existent or failed and removes any local
+   * listeners.
    *
    * @param {Object} msg A message from the publication provider.
    */
@@ -126,7 +129,17 @@ class Subscription extends EventEmitter {
     if (msg.id !== this._id) return;
 
     this._isFailed = true;
-    this.emit('nosub');
+    // If the error was simply that the subscription wasn't found, the `error`
+    // field will simple be `sub-not-found`.
+    let err = msg.error;
+    if (_.isObject(err)) {
+      // If the error was an error that occurred during subscription
+      // initialization though, the `error` field will be an object with the
+      // top level error message as a nested field on the object keyed by
+      // `error`.
+      err = err.error;
+    }
+    this.emit('nosub', new Error(err));
     this._connection.removeListener('ready', this._boundOnReady);
     this._connection.removeListener('nosub', this._boundOnNoSub);
   }

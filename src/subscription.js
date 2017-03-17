@@ -123,8 +123,7 @@ class Subscription {
       msg: 'nosub',
       id: this._id,
       error: {
-        error: err.message || '',
-        message: 'Failed to start subscription'
+        error: err.message || ''
       }
     });
   }
