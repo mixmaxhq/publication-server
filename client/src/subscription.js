@@ -29,8 +29,10 @@ class Subscription extends EventEmitter {
     this._name = name;
     this._params = params;
     this._isReady = false;
+    this._isFailed = false;
 
     this._boundOnReady = this._onReady.bind(this);
+    this._boundOnNoSub = this._onNoSub.bind(this);
     this._start();
   }
 
@@ -60,6 +62,7 @@ class Subscription extends EventEmitter {
       params: this._params
     });
     this._connection.on('ready', this._boundOnReady);
+    this._connection.on('nosub', this._boundOnNoSub);
   }
 
   /**
@@ -82,9 +85,21 @@ class Subscription extends EventEmitter {
    *    to be used.
    */
   whenReady() {
-    return new Promise((resolve) => {
-      return this._connection._isConnected && this._isReady ?
-        resolve() : this.once('ready', resolve);
+    return new Promise((resolve, reject) => {
+      if (this._isFailed) {
+        reject();
+      } else if (this._isReady) {
+        resolve();
+      } else {
+        this.once('ready', () => {
+          this.removeListener('nosub');
+          resolve();
+        });
+        this.once('nosub', () => {
+          this.removeListener('ready');
+          reject();
+        });
+      }
     });
   }
 
@@ -98,7 +113,22 @@ class Subscription extends EventEmitter {
       this._isReady = true;
       this.emit('ready');
       this._connection.removeListener('ready', this._boundOnReady);
+      this._connection.removeListener('nosub', this._boundOnNoSub);
     }
+  }
+
+  /**
+   * Marks the subscription as non-existent and removes any local listeners.
+   *
+   * @param {Object} msg A message from the publication provider.
+   */
+  _onNoSub(msg) {
+    if (msg.id !== this._id) return;
+
+    this._isFailed = true;
+    this.emit('nosub');
+    this._connection.removeListener('ready', this._boundOnReady);
+    this._connection.removeListener('nosub', this._boundOnNoSub);
   }
 }
 
