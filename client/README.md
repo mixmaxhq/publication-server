@@ -80,6 +80,16 @@ client.subscribe('foo').whenReady().then(() => {
 });
 ```
 
+Likewise, if a subscription fails during initialization, the Promise returned
+from `whenReady` will reject with the responsible error and a `nosub` event
+will also be emitted.
+
+```js
+client.subscribe('noSuchSub').whenReady().catch((err) => {
+  console.log(`Subscription failed with err: ${err.message}`);
+});
+```
+
 #### Waiting on initial subscriptions to load
 `whenReady` is provided as a convenience function if you want to be able to
 wait for a single subscription or for multiple subscriptions to complete
@@ -113,6 +123,20 @@ do not need to be re-created, they will still function as desired.
 Note that similarly to how a subscription emits `ready` when it is ready, after
 the client has been disconnected and a subscription is ready after
 re-subscription, it will again emit a `ready` event.
+
+#### Subscription errors after initialization
+After a subscription has been initialized, errors may still occur server side.
+The subscription may be listened to in order to receive these events which are
+emitted as `nosub` events (the naming comes from Meteor which this publication
+system is based off of, [see this documentation for more detail][meteor-ddp]).
+
+```js
+let helloSub = client.subscribe('hello');
+
+helloSub.on('nosub', (err) => {
+  console.log(`the subscription experienced an error: ${err.message}`);
+});
+```
 
 ### Querying collections
 
@@ -160,3 +184,7 @@ entirely new publication-client to reconnect.
 ```js
 client.stop();
 ```
+
+
+
+[meteor-ddp]: https://github.com/meteor/meteor/blob/devel/packages/ddp/DDP.md
