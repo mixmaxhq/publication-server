@@ -95,9 +95,9 @@ pubSub.publish('PublicationName', function() {
 ```
 
 #### Errors inside a publication
-If we encounter an error prior to marking a publication as `ready`, we should
-pass the error to `this.error()`. This will call the registered error handler,
-and pass the error along to the client.
+If a publication encounters an error, it should pass the error to `this.error()`.
+This will call the registered error handler, and pass the error along to the client.
+
 ```js
 pubSub.publish('PublicationName', function() {
   this.error(new Error('failed to do something require'));
@@ -107,7 +107,7 @@ pubSub.publish('PublicationName', function() {
 
 #### Error handling
 Errors passed to the error handler provided upon server initialization are
-objects with there properties:
+objects with these properties:
 
  - `error`: The original error that was reported by the publication.
  - `userId`: The ID of the user who was subscribing to the publication when the
