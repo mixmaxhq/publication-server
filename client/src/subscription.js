@@ -180,7 +180,7 @@ class Subscription extends EventEmitter {
     if (_.isObject(err)) err = err.error;
 
     let e = new Error(err);
-    e._publicationName = this._name; // Attach the publication name for reporting.
+    e.publicationName = this._name; // Attach the publication name for reporting.
     return e;
   }
 }
