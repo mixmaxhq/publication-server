@@ -133,6 +133,7 @@ See [publication-client](https://github.com/mixmaxhq/publication-server/blob/mas
 
 
 ### Changelog
+* 1.4.5 `err._publicationName` -> `err.publicationName`
 * 1.4.4 Add the publication name to the error we emit on subscription errors.
 * 1.4.3 Delete subscription references client side when we unsubscribe from a publication.
 * 1.4.2 Fix typo with unsubscribe message.
