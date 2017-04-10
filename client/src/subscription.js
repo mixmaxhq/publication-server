@@ -178,7 +178,10 @@ class Subscription extends EventEmitter {
    */
   _extractErr(err) {
     if (_.isObject(err)) err = err.error;
-    return new Error(err);
+
+    let e = new Error(err);
+    e._publicationName = this._name; // Attach the publication name for reporting.
+    return e;
   }
 }
 
