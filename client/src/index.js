@@ -116,7 +116,13 @@ class PublicationClient extends EventEmitter {
    * @returns {Promise}
    */
   whenConnected() {
-    return this._whenConnected;
+    return new Promise((resolve) => {
+      if (this._isConnected) {
+        resolve();
+      } else {
+        this.once('connected', resolve);
+      }
+    });
   }
 
   /**
