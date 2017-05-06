@@ -132,7 +132,11 @@ pubSub.shutdown(10000);
 See [publication-client](https://github.com/mixmaxhq/publication-server/blob/master/client/README.md) for the client for this server.
 
 
-### Changelog
+### Server changelog
+
+May contain some client releases pre-1.5.0.
+
+* 1.5.1 Prevent `Subscription#whenReady` from resolving prematurely after the websocket connects; implement `PublicationClient#whenConnected`
 * 1.5.0 Use Yarn; fix `uws` dependency after previous versions were unpublished.
 * 1.4.5 `err._publicationName` -> `err.publicationName`
 * 1.4.4 Add the publication name to the error we emit on subscription errors.
