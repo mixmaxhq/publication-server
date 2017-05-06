@@ -70,6 +70,7 @@ class PublicationClient extends EventEmitter {
 
       this._connect();
       _.each(this._subscriptions, (sub) => {
+        sub._reset();
         sub._start();
       });
     });
