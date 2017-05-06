@@ -10,7 +10,6 @@
   "scripts": {
     "build": "[ \"$WATCH\" == 'true' ] && rollup -cw || rollup -c",
     "watch": "WATCH=true npm run build",
-    "test": "JASMINE_CONFIG_PATH='spec/node/support/jasmine.json' jasmine",
     "prebuild": "rm -rf dist",
     "prepublish": "npm run build"
   },

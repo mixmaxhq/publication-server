@@ -70,6 +70,7 @@ class PublicationClient extends EventEmitter {
 
       this._connect();
       _.each(this._subscriptions, (sub) => {
+        sub._reset();
         sub._start();
       });
     });
@@ -110,13 +111,19 @@ class PublicationClient extends EventEmitter {
   }
 
   /**
-   * Returns a promise that will be resolved once the the publicated provider
+   * Returns a promise that will be resolved once the the publication provider
    * acknowledges to us that we are `connected`.
    *
    * @returns {Promise}
    */
   whenConnected() {
-    return this._whenConnected;
+    return new Promise((resolve) => {
+      if (this._isConnected) {
+        resolve();
+      } else {
+        this.once('connected', resolve);
+      }
+    });
   }
 
   /**

@@ -28,21 +28,37 @@ class Subscription extends EventEmitter {
     this._connection = conn;
     this._name = name;
     this._params = params;
-    this._isReady = false;
-    this._isFailed = false;
-    this._isStopped = false;
 
     this._boundOnReady = this._onReady.bind(this);
     this._boundOnNoSub = this._onNoSub.bind(this);
     this._boundOnNoSubPostInit = this._onNoSubPostInitialization.bind(this);
+
+    this._reset();
     this._start();
+  }
+
+  /**
+   * Prepare to start the subscription. May be called after starting the subscription without
+   * having stopped the subscription using `stop`. This is useful if the connection was disconnected
+   * and we are reconnecting.
+   */
+  _reset() {
+    this._isReady = false;
+    this._isFailed = false;
+    this._initializationError = null;
+    this._isStopped = false;
   }
 
   /**
    * Starts a subscription (sends the initial `sub` message) only once the
    * connection is ready.
+   *
+   * `_reset` must be called first.
    */
   _start() {
+    // If we hit this, someone forgot to call `_reset`.
+    if (this._isReady) throw new Error(`Subscription ${this._id} is already started.`);
+
     if (this._connection._isConnected) {
       this._sendSubMsg();
     } else {
