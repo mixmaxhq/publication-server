@@ -110,7 +110,7 @@ class PublicationClient extends EventEmitter {
   }
 
   /**
-   * Returns a promise that will be resolved once the the publicated provider
+   * Returns a promise that will be resolved once the the publication provider
    * acknowledges to us that we are `connected`.
    *
    * @returns {Promise}
