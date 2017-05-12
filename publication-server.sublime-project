@@ -5,6 +5,10 @@
       "node_modules",
       "client/dist"
     ],
+    "file_exclude_patterns": [
+      // Yarn lock file
+      "yarn.lock"
+    ]
   }],
   "settings": {
     "tab_size": 2,
