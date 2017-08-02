@@ -11,8 +11,8 @@ import _ from 'underscore';
  * @return {[type]}          [description]
  */
 function isMatch(doc, selector) {
-  var keys = _.keys(selector),
-      length = keys.length;
+  var keys = _.keys(selector);
+  var length = keys.length;
   if (doc === null) return !length;
   var obj = Object(doc);
   for (var i = 0; i < length; i++) {
@@ -26,9 +26,9 @@ function isMatch(doc, selector) {
     if (_.isObject(selector[key]) && _.isArray(obj[key])) {
       var objKeys = _.keys(selector[key]);
       if (objKeys.length === 1 && objKeys[0] === '$elemMatch') {
-        var arrayVals = obj[key],
-            elemMatchQuery = selector[key].$elemMatch,
-            foundMatch = false;
+        var arrayVals = obj[key];
+        var elemMatchQuery = selector[key].$elemMatch;
+        var foundMatch = false;
         for (var j = 0; j < arrayVals.length; j++) {
           if (isMatch(arrayVals[j], elemMatchQuery)) {
             foundMatch = true;

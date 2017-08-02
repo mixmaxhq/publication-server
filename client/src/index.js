@@ -91,22 +91,22 @@ class PublicationClient extends EventEmitter {
   _handleMessage(msg) {
     if (!msg || !msg.msg) return;
 
-    switch(msg.msg) {
-    case 'added':
-    case 'changed':
-    case 'removed':
-      this[`_on${initialTitleCase(msg.msg)}`](msg);
-      break;
-    case 'connected':
-      this._isConnected = true;
-      this.emit('connected');
-      break;
-    case 'ready':
-      this.emit('ready', msg);
-      break;
-    default:
-      this.emit(msg.msg, msg);
-      break;
+    switch (msg.msg) {
+      case 'added':
+      case 'changed':
+      case 'removed':
+        this[`_on${initialTitleCase(msg.msg)}`](msg);
+        break;
+      case 'connected':
+        this._isConnected = true;
+        this.emit('connected');
+        break;
+      case 'ready':
+        this.emit('ready', msg);
+        break;
+      default:
+        this.emit(msg.msg, msg);
+        break;
     }
   }
 

@@ -227,7 +227,7 @@ class Session {
       this.stop();
     });
 
-    this.spark.on('error', (err) => {
+    this.spark.on('error', () => {
       this.stop();
     });
 
@@ -237,7 +237,7 @@ class Session {
         this.send({
           msg: 'error',
           reason: 'must-provide-msg-type',
-          offendingMessage: msg
+          offendingMessage: data
         });
         return;
       }
