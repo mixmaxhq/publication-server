@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
   },
   "keywords": [
     "publications",
@@ -19,5 +20,13 @@
     "primus": "^6.0.8",
     "underscore": "^1.8.3",
     "uws": "^0.14.1"
-  }
+  },
+  "devDependencies": {
+    "eslint": ">=3",
+    "eslint-config-mixmax": "^0.6.0",
+    "pre-commit": "^1.2.2"
+  },
+  "pre-commit": [
+    "lint"
+  ]
 }
