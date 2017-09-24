@@ -823,9 +823,9 @@ prelude-ls@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
 
-primus@^6.0.8:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/primus/-/primus-6.1.0.tgz#b3bf4c938eb07874b872bc2b0ce9c0da855d6c12"
+primus@^7.1.0:
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/primus/-/primus-7.1.0.tgz#1e437c7d7699f7875fc633bc57aa6173cf2e2dfe"
   dependencies:
     access-control "~1.0.0"
     asyncemit "~3.0.1"
@@ -1047,9 +1047,9 @@ util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
 
-uws@^0.14.1:
-  version "0.14.1"
-  resolved "https://registry.yarnpkg.com/uws/-/uws-0.14.1.tgz#89b8eb7bced272c65621472e878c57f4e0e00640"
+uws@^8.14.1:
+  version "8.14.1"
+  resolved "https://registry.yarnpkg.com/uws/-/uws-8.14.1.tgz#de09619f305f6174d5516a9c6942cb120904b20b"
 
 vary@1.1.x:
   version "1.1.1"
