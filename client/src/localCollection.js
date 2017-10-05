@@ -1,6 +1,7 @@
 'use struct';
 
 import _ from 'underscore';
+import cloneDeep from 'lodash.cloneDeep';
 import EventEmitter from 'eventemitter3';
 
 import ReactiveQuery from './ReactiveQuery';
@@ -33,7 +34,9 @@ class LocalCollection extends EventEmitter {
       _id: id
     });
 
-    this.emit('added', doc);
+    // Make sure that we emit a cloned copy, so that no consumer holds a direct
+    // reference to the underlying document.
+    this.emit('added', cloneDeep(doc));
   }
 
   /**
@@ -66,7 +69,10 @@ class LocalCollection extends EventEmitter {
       // Note that the changeset might be empty because `fields` wasn't set.
       changeset = deepExtend(changeset || {}, clearedObj);
     }
-    this.emit('changed', doc, changeset);
+
+    // Make sure that we emit a cloned copy, so that no consumer holds a direct
+    // reference to the underlying document.
+    this.emit('changed', cloneDeep(doc), changeset);
   }
 
   /**
