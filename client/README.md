@@ -189,6 +189,7 @@ client.stop();
 
 See [the server changelog](https://github.com/mixmaxhq/publication-server/blob/master/README.md#server-changelog) for releases pre-1.4.6.
 
+* 1.4.7 Use `lodash.cloneDeep` to ensure that we don't emit direct object references during event emission.
 * 1.4.6 Prevent `Subscription#whenReady` from resolving prematurely after the websocket connects; implement `PublicationClient#whenConnected`
 
 [meteor-ddp]: https://github.com/meteor/meteor/blob/devel/packages/ddp/DDP.md
