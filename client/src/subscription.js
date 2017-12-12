@@ -3,6 +3,8 @@
 import _ from 'underscore';
 import EventEmitter from 'eventemitter3';
 
+import { Promise } from 'es6-promise';
+
 /**
  * A Subscription encapsulates the logic of subscribing to server side
  * publications and letting any callers know when the subscription to that

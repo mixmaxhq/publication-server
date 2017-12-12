@@ -6,6 +6,7 @@ import EventEmitter from 'eventemitter3';
 import LocalCollection from './LocalCollection';
 import Primus from './Primus';
 import Subscription from './Subscription';
+import { Promise } from 'es6-promise';
 
 /**
  * Returns the initial title case of the string, for example:
@@ -245,7 +246,7 @@ class PublicationClient extends EventEmitter {
    * it is not.
    *
    * @returns {Boolean} Whether the client is connected to the server or not.
-   */ 
+   */
   get isConnected() {
     return this._isConnected;
   }
