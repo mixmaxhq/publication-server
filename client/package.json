@@ -20,6 +20,7 @@
   "author": "Trey Tacon <trey@mixmax.com> (https://mixmax.com)",
   "license": "MIT",
   "dependencies": {
+    "es6-promise": "^4.1.1",
     "eventemitter3": "^2.0.2",
     "lodash.clonedeep": "^4.5.0"
   },
