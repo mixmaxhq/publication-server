@@ -11,7 +11,10 @@ export default {
   plugins: [
     nodeResolve(),
     commonjs({
-      include: ['node_modules/**']
+      include: ['node_modules/**'],
+      namedExports: {
+        'es6-promise': ['Promise']
+      }
     }),
     babel({
       presets: [
