@@ -125,8 +125,29 @@ class Session {
 
     const name = msg.name;
     let params = msg.params;
-    // Attempt to parse string params, since a JSON object is required.
-    if (typeof params === 'string') params = JSON.parse(params);
+    // Attempt to parse string params, since a JSON array is required.
+    if (_.isString(params)) {
+      try {
+        params = JSON.parse(params);
+      } catch (err) {
+        this.send({
+          msg: 'error',
+          reason: 'unable-to-parse-params',
+          offendingMessage: msg
+        });
+        return;
+      }
+
+      if (!_.isArray(params)) {
+        this.send({
+          msg: 'error',
+          reason: 'invalid-params',
+          offendingMessage: msg
+        });
+        return;
+      }
+    }
+
     const handler = this.server._subscriptions[name];
     // If the publication doesn't exist, reply with `nosub`.
     if (!handler) {
