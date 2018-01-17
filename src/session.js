@@ -124,7 +124,9 @@ class Session {
     }
 
     const name = msg.name;
-    const params = msg.params;
+    let params = msg.params;
+    // Attempt to parse string params, since a JSON object is required.
+    if (typeof params === 'string') params = JSON.parse(params);
     const handler = this.server._subscriptions[name];
     // If the publication doesn't exist, reply with `nosub`.
     if (!handler) {
