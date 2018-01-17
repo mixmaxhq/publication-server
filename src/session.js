@@ -137,15 +137,15 @@ class Session {
         });
         return;
       }
+    }
 
-      if (!_.isArray(params)) {
-        this.send({
-          msg: 'error',
-          reason: 'invalid-params',
-          offendingMessage: msg
-        });
-        return;
-      }
+    if (!_.isArray(params)) {
+      this.send({
+        msg: 'error',
+        reason: 'invalid-params',
+        offendingMessage: msg
+      });
+      return;
     }
 
     const handler = this.server._subscriptions[name];
