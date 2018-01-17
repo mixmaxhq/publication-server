@@ -21,7 +21,7 @@ class Subscription {
     this._session = session;
     this._name = name;
     this._handler = handler;
-    this._params = params;
+    this._params = typeof params !== 'string' ? params : JSON.parse(params);
     this._id = id;
     this._isReady = false;
 
