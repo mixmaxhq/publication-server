@@ -100,15 +100,11 @@ class PublicationClient extends EventEmitter {
         break;
       case 'connected':
         this._isConnected = true;
-        this.emit('connected');
-        break;
-      case 'ready':
-        this.emit('ready', msg);
-        break;
-      default:
-        this.emit(msg.msg, msg);
         break;
     }
+
+    // Relay all messages received.
+    this.emit(msg.msg, msg);
   }
 
   /**
