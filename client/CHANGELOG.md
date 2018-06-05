@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.4.10 Fix README, correct for accidental 1.4.9 publish
+
 * 1.4.9 deyarn
 
 * 1.4.8 Add ES6 `Promise` polyfill
