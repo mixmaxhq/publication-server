@@ -6,7 +6,7 @@ a [publication-server](https://github.com/mixmaxhq/publication-server).
 
 ## Installation
 ```
-$ npm install --save @mixmaxhq/publication-client
+$ npm install @mixmaxhq/publication-client
 ```
 
 ## Usage
