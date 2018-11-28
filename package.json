@@ -28,5 +28,9 @@
   },
   "pre-commit": [
     "lint"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://github.com/mixmaxhq/publication-server.git"
+  }
 }
