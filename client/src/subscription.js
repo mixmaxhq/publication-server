@@ -89,7 +89,7 @@ class Subscription extends EventEmitter {
    * Stops the subscription by unsubscribing from the publication provider.
    */
   stop() {
-    if (this._isStopped || !this._isReady) return;
+    if (this._isStopped) return;
 
     this._isStopped = true;
     this._connection._send({
@@ -117,9 +117,15 @@ class Subscription extends EventEmitter {
         // received an error, still automatically mark the subscription as
         // ready since it originally was.
         resolve();
+      } else if (this._isStopped) {
+        // `stop()` was called before the subscription was ready.
+        reject('Subscription is already stopped');
       } else {
         this.once('ready', () => {
           this.removeListener('nosub');
+          if (this._isStopped) {
+            reject('Subscription is already stopped');
+          }
           resolve();
         });
         this.once('nosub', (err) => {
