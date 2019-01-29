@@ -90,8 +90,16 @@ class Subscription extends EventEmitter {
    */
   stop() {
     if (this._isStopped) return;
-
     this._isStopped = true;
+
+    // Stop listening for events from the connection.
+    this._connection.removeListener('ready', this._boundOnReady);
+    this._connection.removeListener('nosub', this._boundOnNoSub);
+
+    // Stop listening for events potentially set up by `whenReady`.
+    this.removeListener('ready');
+    this.removeListener('nosub');
+
     this._connection._send({
       msg: 'unsub',
       id: this._id
@@ -119,13 +127,10 @@ class Subscription extends EventEmitter {
         resolve();
       } else if (this._isStopped) {
         // `stop()` was called before the subscription was ready.
-        reject('Subscription is already stopped');
+        reject(new Error('Subscription is already stopped'));
       } else {
         this.once('ready', () => {
           this.removeListener('nosub');
-          if (this._isStopped) {
-            reject('Subscription is already stopped');
-          }
           resolve();
         });
         this.once('nosub', (err) => {
