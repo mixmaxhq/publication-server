@@ -59,6 +59,7 @@ class Subscription {
       added: (collection, id, fields) => {
         this._session.send({
           msg: 'added',
+          subscriptionId: this._id,
           collection,
           id,
           fields
@@ -77,6 +78,7 @@ class Subscription {
       changed: (collection, id, fields) => {
         this._session.send({
           msg: 'changed',
+          subscriptionId: this._id,
           collection,
           id,
           fields
@@ -94,6 +96,7 @@ class Subscription {
       removed: (collection, id) => {
         this._session.send({
           msg: 'removed',
+          subscriptionId: this._id,
           collection,
           id
         });
