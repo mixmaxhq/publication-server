@@ -194,6 +194,17 @@ class PublicationClient extends EventEmitter {
   }
 
   /**
+   * Determine whether a subscription with the given ID exists.
+   *
+   * @param {String} id The ID of the subscription we're looking for.
+   *
+   * @returns {boolean} True if a subscription with the given ID exists.
+   */
+  _subscriptionExists(id) {
+    return !!_.findWhere(this._subscriptions, { _id: id });
+  }
+
+  /**
    * Adds the document with the given ID and fields to the given collection
    * (all defined inside the message).
    *
@@ -201,6 +212,9 @@ class PublicationClient extends EventEmitter {
    *    collection to add it to.
    */
   _onAdded(message) {
+    // If the subscription that this collection was created by no longer exists,
+    // don't add the document. The collection is stagnant at this point.
+    if (!this._subscriptionExists(message.subscriptionId)) return;
     var collectionName = message.collection;
     var id = message.id;
     var fields = message.fields;
@@ -217,6 +231,9 @@ class PublicationClient extends EventEmitter {
    *    the collection that it exists inside of.
    */
   _onChanged(message) {
+    // If the subscription that this collection was created by no longer exists,
+    // don't change the document. The collection is stagnant at this point.
+    if (!this._subscriptionExists(message.subscriptionId)) return;
     var collectionName = message.collection;
     var id = message.id;
     var fields = message.fields;
@@ -234,6 +251,9 @@ class PublicationClient extends EventEmitter {
    *    the collection to remove it from.
    */
   _onRemoved(message) {
+    // If the subscription that this collection was created by no longer exists,
+    // don't remove the document. The collection is stagnant at this point.
+    if (!this._subscriptionExists(message.subscriptionId)) return;
     var collectionName = message.collection;
     var id = message.id;
 
