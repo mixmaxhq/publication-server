@@ -34,9 +34,11 @@ class Subscription extends EventEmitter {
     this._boundOnReady = this._onReady.bind(this);
     this._boundOnNoSub = this._onNoSub.bind(this);
     this._boundOnNoSubPostInit = this._onNoSubPostInitialization.bind(this);
+    this._boundWhenReadyResolver = this._whenReadyResolver.bind(this);
+    this._boundWhenReadyRejecter = this._whenReadyRejecter.bind(this);
 
-    this.whenReadyResolveFn = null;
-    this.whenReadyRejectFn = null;
+    this._whenReadyResolveFn = null;
+    this._whenReadyRejectFn = null;
 
     this._reset();
     this._start();
@@ -52,8 +54,8 @@ class Subscription extends EventEmitter {
     this._isFailed = false;
     this._initializationError = null;
     this._isStopped = false;
-    this.whenReadyResolveFn = null;
-    this.whenReadyRejectFn = null;
+    this._whenReadyResolveFn = null;
+    this._whenReadyRejectFn = null;
   }
 
   /**
@@ -102,8 +104,8 @@ class Subscription extends EventEmitter {
     this._connection.removeListener('nosub', this._boundOnNoSub);
 
     // Stop listening for events potentially set up by `whenReady`.
-    this.removeListener('ready', this.whenReadyResolver);
-    this.removeListener('nosub', this.whenReadyRejecter);
+    this.removeListener('ready', this._boundWhenReadyResolver);
+    this.removeListener('nosub', this._boundWhenReadyRejecter);
 
     this._connection._send({
       msg: 'unsub',
@@ -122,8 +124,8 @@ class Subscription extends EventEmitter {
    */
   whenReady() {
     return new Promise((resolve, reject) => {
-      this.whenReadyResolveFn = resolve;
-      this.whenReadyRejectFn = reject;
+      this._whenReadyResolveFn = resolve;
+      this._whenReadyRejectFn = reject;
       if (this._isFailed) {
         // We automatically reject if we failed to initialize the subscription.
         reject(this._initializationError);
@@ -136,8 +138,8 @@ class Subscription extends EventEmitter {
         // `stop()` was called before the subscription was ready.
         reject(new Error('Subscription is already stopped'));
       } else {
-        this.once('ready', this.whenReadyResolver);
-        this.once('nosub', this.whenReadyRejecter);
+        this.once('ready', this._boundWhenReadyResolver);
+        this.once('nosub', this._boundWhenReadyRejecter);
       }
     });
   }
@@ -145,17 +147,17 @@ class Subscription extends EventEmitter {
   /**
    * Named function to resolve the whenReady promise and clean up the nosub listener.
    */
-  whenReadyResolver() {
-    this.removeListener('nosub', this.whenReadyRejecter);
-    this.whenReadyResolveFn();
+  _whenReadyResolver() {
+    this.removeListener('nosub', this._boundWhenReadyRejecter);
+    this._whenReadyResolveFn();
   }
 
   /**
    * Named function to reject the whenReady promise and clean up the ready listener.
    */
-  whenReadyRejecter(err) {
-    this.removeListener('ready', this.whenReadyResolver);
-    this.whenReadyRejectFn(err);
+  _whenReadyRejecter(err) {
+    this.removeListener('ready', this._boundWhenReadyResolver);
+    this._whenReadyRejectFn(err);
   }
 
   /**
