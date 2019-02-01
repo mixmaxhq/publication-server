@@ -35,6 +35,9 @@ class Subscription extends EventEmitter {
     this._boundOnNoSub = this._onNoSub.bind(this);
     this._boundOnNoSubPostInit = this._onNoSubPostInitialization.bind(this);
 
+    this.whenReadyResolveFn = null;
+    this.whenReadyRejectFn = null;
+
     this._reset();
     this._start();
   }
@@ -49,6 +52,8 @@ class Subscription extends EventEmitter {
     this._isFailed = false;
     this._initializationError = null;
     this._isStopped = false;
+    this.whenReadyResolveFn = null;
+    this.whenReadyRejectFn = null;
   }
 
   /**
@@ -97,8 +102,8 @@ class Subscription extends EventEmitter {
     this._connection.removeListener('nosub', this._boundOnNoSub);
 
     // Stop listening for events potentially set up by `whenReady`.
-    this.removeListener('ready');
-    this.removeListener('nosub');
+    this.removeListener('ready', this.whenReadyResolver);
+    this.removeListener('nosub', this.whenReadyRejecter);
 
     this._connection._send({
       msg: 'unsub',
@@ -117,6 +122,8 @@ class Subscription extends EventEmitter {
    */
   whenReady() {
     return new Promise((resolve, reject) => {
+      this.whenReadyResolveFn = resolve;
+      this.whenReadyRejectFn = reject;
       if (this._isFailed) {
         // We automatically reject if we failed to initialize the subscription.
         reject(this._initializationError);
@@ -129,16 +136,26 @@ class Subscription extends EventEmitter {
         // `stop()` was called before the subscription was ready.
         reject(new Error('Subscription is already stopped'));
       } else {
-        this.once('ready', () => {
-          this.removeListener('nosub');
-          resolve();
-        });
-        this.once('nosub', (err) => {
-          this.removeListener('ready');
-          reject(err);
-        });
+        this.once('ready', this.whenReadyResolver);
+        this.once('nosub', this.whenReadyRejecter);
       }
     });
+  }
+
+  /**
+   * Named function to resolve the whenReady promise and clean up the nosub listener.
+   */
+  whenReadyResolver() {
+    this.removeListener('nosub', this.whenReadyRejecter);
+    this.whenReadyResolveFn();
+  }
+
+  /**
+   * Named function to reject the whenReady promise and clean up the ready listener.
+   */
+  whenReadyRejecter(err) {
+    this.removeListener('ready', this.whenReadyResolver);
+    this.whenReadyRejectFn(err);
   }
 
   /**
