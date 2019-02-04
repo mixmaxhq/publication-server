@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.4.11 Allow stopping a subscription before its 'ready' event is received
+
 * 1.4.10 Fix README, correct for accidental 1.4.9 publish
 
 * 1.4.9 deyarn
