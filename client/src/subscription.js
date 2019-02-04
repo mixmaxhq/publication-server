@@ -34,6 +34,11 @@ class Subscription extends EventEmitter {
     this._boundOnReady = this._onReady.bind(this);
     this._boundOnNoSub = this._onNoSub.bind(this);
     this._boundOnNoSubPostInit = this._onNoSubPostInitialization.bind(this);
+    this._boundWhenReadyResolver = this._whenReadyResolver.bind(this);
+    this._boundWhenReadyRejecter = this._whenReadyRejecter.bind(this);
+
+    this._whenReadyResolveFn = null;
+    this._whenReadyRejectFn = null;
 
     this._reset();
     this._start();
@@ -49,6 +54,8 @@ class Subscription extends EventEmitter {
     this._isFailed = false;
     this._initializationError = null;
     this._isStopped = false;
+    this._whenReadyResolveFn = null;
+    this._whenReadyRejectFn = null;
   }
 
   /**
@@ -89,9 +96,17 @@ class Subscription extends EventEmitter {
    * Stops the subscription by unsubscribing from the publication provider.
    */
   stop() {
-    if (this._isStopped || !this._isReady) return;
-
+    if (this._isStopped) return;
     this._isStopped = true;
+
+    // Stop listening for events from the connection.
+    this._connection.removeListener('ready', this._boundOnReady);
+    this._connection.removeListener('nosub', this._boundOnNoSub);
+
+    // Stop listening for events potentially set up by `whenReady`.
+    this.removeListener('ready', this._boundWhenReadyResolver);
+    this.removeListener('nosub', this._boundWhenReadyRejecter);
+
     this._connection._send({
       msg: 'unsub',
       id: this._id
@@ -109,6 +124,8 @@ class Subscription extends EventEmitter {
    */
   whenReady() {
     return new Promise((resolve, reject) => {
+      this._whenReadyResolveFn = resolve;
+      this._whenReadyRejectFn = reject;
       if (this._isFailed) {
         // We automatically reject if we failed to initialize the subscription.
         reject(this._initializationError);
@@ -117,17 +134,30 @@ class Subscription extends EventEmitter {
         // received an error, still automatically mark the subscription as
         // ready since it originally was.
         resolve();
+      } else if (this._isStopped) {
+        // `stop()` was called before the subscription was ready.
+        reject(new Error('Subscription is already stopped'));
       } else {
-        this.once('ready', () => {
-          this.removeListener('nosub');
-          resolve();
-        });
-        this.once('nosub', (err) => {
-          this.removeListener('ready');
-          reject(err);
-        });
+        this.once('ready', this._boundWhenReadyResolver);
+        this.once('nosub', this._boundWhenReadyRejecter);
       }
     });
+  }
+
+  /**
+   * Named function to resolve the whenReady promise and clean up the nosub listener.
+   */
+  _whenReadyResolver() {
+    this.removeListener('nosub', this._boundWhenReadyRejecter);
+    this._whenReadyResolveFn();
+  }
+
+  /**
+   * Named function to reject the whenReady promise and clean up the ready listener.
+   */
+  _whenReadyRejecter(err) {
+    this.removeListener('ready', this._boundWhenReadyResolver);
+    this._whenReadyRejectFn(err);
   }
 
   /**
