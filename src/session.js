@@ -160,7 +160,7 @@ class Session {
     }
 
     // Create the subscription, register it and then start it.
-    let subscription = new Subscription({
+    const subscription = new Subscription({
       session: this,
       handler,
       name,
@@ -184,7 +184,7 @@ class Session {
   unsubscribe(msg) {
     if (this._waitingForConnect) return;
 
-    let sub = this._subscriptions[msg.id];
+    const sub = this._subscriptions[msg.id];
     if (!sub) {
       // No open subscription with the given name.
       this.send({
@@ -213,7 +213,7 @@ class Session {
     }
 
     // Find the correct handler if it exists.
-    let handler = this.handlers[msg.msg];
+    const handler = this.handlers[msg.msg];
     if (!handler) {
       this.send({
         msg: 'error',

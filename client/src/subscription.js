@@ -184,7 +184,7 @@ class Subscription extends EventEmitter {
     if (msg.id !== this._id) return;
 
     this._isFailed = true;
-    let err = this._extractErr(msg.error);
+    const err = this._extractErr(msg.error);
     this._initializationError = err;
     this.emit('nosub', err);
 
@@ -227,7 +227,7 @@ class Subscription extends EventEmitter {
   _extractErr(err) {
     if (_.isObject(err)) err = err.error;
 
-    let e = new Error(err);
+    const e = new Error(err);
     e.publicationName = this._name; // Attach the publication name for reporting.
     return e;
   }

@@ -46,6 +46,7 @@ class Subscription {
   _start() {
     this._handler.apply({
       userId: this._session.userId,
+      name: this._name,
 
       /**
        * Sends an added message adding an object with the given `id` to the given
