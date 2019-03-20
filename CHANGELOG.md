@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.6.4 Add name property when applying subscription handler functions
+
 * 1.6.3 Update client version
 
 * 1.6.2 Fix erroneous publish
