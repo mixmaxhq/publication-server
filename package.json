@@ -19,16 +19,12 @@
     "node-uuid": "^1.4.7",
     "primus": "^7.3.3",
     "underscore": "^1.8.3",
-    "uws": "^10.148.1"
+    "uws": "10.148.1"
   },
   "devDependencies": {
     "eslint": "^5.15.3",
-    "eslint-config-mixmax": "^2.0.0",
-    "pre-commit": "^1.2.2"
+    "eslint-config-mixmax": "^2.0.0"
   },
-  "pre-commit": [
-    "lint"
-  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://github.com/mixmaxhq/publication-server.git"
