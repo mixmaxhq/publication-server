@@ -1,5 +1,7 @@
 ## Release History
 
+* 2.0.0 *Breaking* Upgrade primus to 7.3.3. This changes the `ping` and `pong` attributes when passing options to the primus client to one `pingTimeout` option.
+
 * 1.4.11 Allow stopping a subscription before its 'ready' event is received
 
 * 1.4.10 Fix README, correct for accidental 1.4.9 publish
