@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.7.0 Upgrades to primus 7.3.3 and uws 10.148.1 for node 10 support
+
 * 1.6.4 Add name property when applying subscription handler functions
 
 * 1.6.3 Update client version
