@@ -39,7 +39,8 @@ class PublicationServer {
       authorization: this._authFn,
       pathname: this._mountPath,
       parser: 'EJSON',
-      transformer: 'uws'
+      transformer: 'uws',
+      pingInterval: false
     });
 
     this._primus.on('connection', (spark) => {
