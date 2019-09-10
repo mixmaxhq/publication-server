@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.8.1 Disable pingInterval that's handled by the server
+
 * 1.8.0 Fix unpinned `uws` version
 
 * 1.7.0 Upgrades to primus 7.3.3 and uws 10.148.1 for node 10 support
