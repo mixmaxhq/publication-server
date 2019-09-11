@@ -21,7 +21,7 @@ class PublicationServer {
    *    to.
    * @param {Object} server The HTTP server to allow Primus to listen on.
    */
-  constructor({authFn, mountPath, errHandler, server} = {}) {
+  constructor({authFn, mountPath, errHandler, server, transformer} = {}) {
     assert(authFn, 'Must provide an authorization function');
 
     this._subscriptions = {};
@@ -39,7 +39,7 @@ class PublicationServer {
       authorization: this._authFn,
       pathname: this._mountPath,
       parser: 'EJSON',
-      transformer: 'uws',
+      transformer: transformer || 'uws',
       pingInterval: false
     });
 
