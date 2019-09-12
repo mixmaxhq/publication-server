@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.9.2 Fix botched 1.9.1 publish to include primus and uws downgrades
+
 *  Fix breaking change in ping/pong messages
 
 * 1.9.0 Add `transformer` option to primus initialization defaulting to `uws`
