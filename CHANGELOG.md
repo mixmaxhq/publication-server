@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.9.0 Add `transformer` option to primus initialization defaulting to `uws`
+
 * 1.8.1 Disable pingInterval that's handled by the server
 
 * 1.8.0 Fix unpinned `uws` version
