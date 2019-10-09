@@ -164,10 +164,10 @@ To listen for changes that match a provided query:
 ```js
 client.getCollection('baz').find({
   _id: 'foo'
-}).on('added', (doc) => {
-  console.log(`added a new document: ${doc}`);
-}).on('changed', (doc, changes) => {
-  console.log(`document with id ${doc._id} has changes: ${changes}`);
+}).on('added', (id, fields) => {
+  console.log(`added a new document: ${Object.assign({}, {id}, fields)}`);
+}).on('changed', (id, changes) => {
+  console.log(`document with id ${id} has changes: ${changes}`);
 }).on('removed', (id) => {
   console.log(`removed document with id: ${id}`);
 });
