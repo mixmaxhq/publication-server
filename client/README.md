@@ -165,8 +165,12 @@ To listen for changes that match a provided query:
 client.getCollection('baz').find({
   _id: 'foo'
 }).on('added', (id, fields) => {
+  // `fields` contains all fields of the document excluding the `_id` field.
   console.log(`added a new document: ${Object.assign({}, {id}, fields)}`);
 }).on('changed', (id, changes) => {
+  // `fields` contains the changed fields with their new values.
+  // If a field was removed from the document then it will be present in `fields`
+  // with a value of `undefined`.
   console.log(`document with id ${id} has changes: ${changes}`);
 }).on('removed', (id) => {
   console.log(`removed document with id: ${id}`);
