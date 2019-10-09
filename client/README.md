@@ -168,8 +168,8 @@ client.getCollection('baz').find({
   // `fields` contains all fields of the document excluding the `_id` field.
   console.log(`added a new document: ${Object.assign({}, {id}, fields)}`);
 }).on('changed', (id, changes) => {
-  // `fields` contains the changed fields with their new values.
-  // If a field was removed from the document then it will be present in `fields`
+  // `changes` contains the changed fields with their new values.
+  // If a field was removed from the document then it will be present in `changes`
   // with a value of `undefined`.
   console.log(`document with id ${id} has changes: ${changes}`);
 }).on('removed', (id) => {
