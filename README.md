@@ -129,23 +129,4 @@ pubSub.shutdown(10000);
 
 ### Client
 
-See [publication-client](https://github.com/mixmaxhq/publication-server/blob/master/client/README.md) for the client for this server.
-
-
-### Server changelog
-
-May contain some client releases pre-1.5.0.
-
-* 1.5.1 Prevent `Subscription#whenReady` from resolving prematurely after the websocket connects; implement `PublicationClient#whenConnected`
-* 1.5.0 Use Yarn; fix `uws` dependency after previous versions were unpublished.
-* 1.4.5 `err._publicationName` -> `err.publicationName`
-* 1.4.4 Add the publication name to the error we emit on subscription errors.
-* 1.4.3 Delete subscription references client side when we unsubscribe from a publication.
-* 1.4.2 Fix typo with unsubscribe message.
-* 1.4.1 Handle subscription initialization errors.
-* 1.4.0 Handle custom event broadcasting (for shutdown message specifically).
-* 1.3.0 All shutdown options to be passed through to Primus.
-* 1.2.1 Enforce message ordering to the client.
-* 1.1.1 Fix bad ObjectUtils reference.
-* 1.1.0 Alter how we wrap the authentication function and make it required.
-* 1.0.0 Initial release of server and client
+See [publication-client](https://github.com/mixmaxhq/publication-client) for the client for this server.

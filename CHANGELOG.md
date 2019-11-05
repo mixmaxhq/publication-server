@@ -22,4 +22,20 @@
 
 * 1.6.0 Pin the uws version.
 
-* 1.5.1 Fix Subscription initialization parameters
+* 1.5.1 Prevent `Subscription#whenReady` from resolving prematurely after the websocket connects; implement `PublicationClient#whenConnected`
+
+* 1.5.0 Use Yarn; fix `uws` dependency after previous versions were unpublished.
+
+* 1.4.4 Remove message field from nosub message.
+
+* 1.4.1 Handle subscription initialization errors.
+
+* 1.4.0 Handle custom event broadcasting (for shutdown message specifically).
+
+* 1.3.0 All shutdown options passed through to Primus.
+
+* 1.1.1 Fix bad ObjectUtils reference.
+
+* 1.1.0 Alter how we wrap the authentication function and make it required.
+
+* 1.0.0 Initial release
