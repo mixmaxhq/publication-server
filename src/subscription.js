@@ -17,7 +17,7 @@ class Subscription {
    * @param {String} id The ID that the client has registered for this
    *    Subscription.
    */
-  constructor({session, name, handler, params, id} = {}) {
+  constructor({ session, name, handler, params, id } = {}) {
     this._session = session;
     this._name = name;
     this._handler = handler;
@@ -44,65 +44,68 @@ class Subscription {
    * Starts the publication.
    */
   _start() {
-    this._handler.apply({
-      userId: this._session.userId,
-      name: this._name,
+    this._handler.apply(
+      {
+        userId: this._session.userId,
+        name: this._name,
 
-      /**
-       * Sends an added message adding an object with the given `id` to the given
-       * `collection`.
-       *
-       * @param {String} collection The collection that the document is being added
-       *    to.
-       * @param {String} id The ID of the document being added.
-       * @param {Object} fields The fields that comprise the document being added.
-       */
-      added: (collection, id, fields) => {
-        this._session.send({
-          msg: 'added',
-          collection,
-          id,
-          fields
-        });
-      },
+        /**
+         * Sends an added message adding an object with the given `id` to the given
+         * `collection`.
+         *
+         * @param {String} collection The collection that the document is being added
+         *    to.
+         * @param {String} id The ID of the document being added.
+         * @param {Object} fields The fields that comprise the document being added.
+         */
+        added: (collection, id, fields) => {
+          this._session.send({
+            msg: 'added',
+            collection,
+            id,
+            fields,
+          });
+        },
 
-      /**
-       * Sends a changed message changing the object with the given `id` in the
-       * given `collection`.
-       *
-       * @param {String} collection The collection that the document that is being
-       *    changed is a member of.
-       * @param {String} id The ID of the document being changed.
-       * @param {Object} fields The fields that have been changed.
-       */
-      changed: (collection, id, fields) => {
-        this._session.send({
-          msg: 'changed',
-          collection,
-          id,
-          fields
-        });
-      },
+        /**
+         * Sends a changed message changing the object with the given `id` in the
+         * given `collection`.
+         *
+         * @param {String} collection The collection that the document that is being
+         *    changed is a member of.
+         * @param {String} id The ID of the document being changed.
+         * @param {Object} fields The fields that have been changed.
+         */
+        changed: (collection, id, fields) => {
+          this._session.send({
+            msg: 'changed',
+            collection,
+            id,
+            fields,
+          });
+        },
 
-      /**
-       * Sends a removed message removing the object with the given `id` from the
-       * given `collection`.
-       *
-       * @param {String} collection The collection that the document is being
-       *    removed from.
-       * @param {String} id The ID of the document being removed.
-       */
-      removed: (collection, id) => {
-        this._session.send({
-          msg: 'removed',
-          collection,
-          id
-        });
+        /**
+         * Sends a removed message removing the object with the given `id` from the
+         * given `collection`.
+         *
+         * @param {String} collection The collection that the document is being
+         *    removed from.
+         * @param {String} id The ID of the document being removed.
+         */
+        removed: (collection, id) => {
+          this._session.send({
+            msg: 'removed',
+            collection,
+            id,
+          });
+        },
+        onStop: this.onStop.bind(this),
+        ready: this.ready.bind(this),
+        error: this.error.bind(this),
       },
-      onStop: this.onStop.bind(this),
-      ready: this.ready.bind(this),
-      error: this.error.bind(this)
-    }, this._params);
+      this._params
+    );
   }
 
   /**
@@ -113,19 +116,21 @@ class Subscription {
    * @param {Error} err The error that was encountered in the publication.
    */
   error(err) {
-    this._session.server._errHandler(new PublicationError(err, {
-      userId: this._session.userId,
-      extra: {
-        name: this._name,
-        params: this._params
-      }
-    }));
+    this._session.server._errHandler(
+      new PublicationError(err, {
+        userId: this._session.userId,
+        extra: {
+          name: this._name,
+          params: this._params,
+        },
+      })
+    );
     this._session.send({
       msg: 'nosub',
       id: this._id,
       error: {
-        error: err.message || ''
-      }
+        error: err.message || '',
+      },
     });
   }
 
@@ -140,7 +145,7 @@ class Subscription {
     this._isReady = true;
     this._session.send({
       msg: 'ready',
-      subs: [this._id]
+      subs: [this._id],
     });
   }
 
@@ -161,6 +166,5 @@ class Subscription {
     _.each(this._stopCallbacks, (fn) => fn());
   }
 }
-
 
 module.exports = Subscription;

@@ -1,4 +1,3 @@
-
 /**
  * A publication error wraps the original error while also providing us with
  * any extra context (`userId` or otherwise).

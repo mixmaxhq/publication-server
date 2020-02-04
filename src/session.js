@@ -11,14 +11,13 @@ const Subscription = require('./subscription');
  * has subscribed to.
  */
 class Session {
-
   /**
    * Constructs a session for a given Primus spark.
    *
    * @param {Object} server The PublicationServer that created this Session.
    * @param {Object} spark The Primus spark that this session has access to.
    */
-  constructor({server, spark} = {}) {
+  constructor({ server, spark } = {}) {
     this.server = server;
     this.spark = spark;
     this._subscriptions = {};
@@ -27,7 +26,7 @@ class Session {
       sub: this.subscribe.bind(this),
       unsub: this.unsubscribe.bind(this),
       connect: this.connect.bind(this),
-      ping: this.ping.bind(this)
+      ping: this.ping.bind(this),
     };
 
     // Set some state on the session.
@@ -66,7 +65,7 @@ class Session {
     if (msg.version !== '1') {
       this.send({
         msg: 'failed',
-        version: '1'
+        version: '1',
       });
       this.stop();
       return;
@@ -81,7 +80,7 @@ class Session {
     this._waitingForConnect = false;
     this.send({
       msg: 'connected',
-      session: this._sessionId
+      session: this._sessionId,
     });
   }
 
@@ -90,7 +89,7 @@ class Session {
    */
   ping(msg) {
     var resp = {
-      msg: 'pong'
+      msg: 'pong',
     };
     if (msg.id) resp.id = msg.id;
     this.send(resp);
@@ -113,7 +112,7 @@ class Session {
       this.send({
         msg: 'error',
         reason: 'connect-must-be-first',
-        offendingMessage: msg
+        offendingMessage: msg,
       });
       return;
     }
@@ -133,7 +132,7 @@ class Session {
         this.send({
           msg: 'error',
           reason: 'unable-to-parse-params',
-          offendingMessage: msg
+          offendingMessage: msg,
         });
         return;
       }
@@ -143,7 +142,7 @@ class Session {
       this.send({
         msg: 'error',
         reason: 'invalid-params',
-        offendingMessage: msg
+        offendingMessage: msg,
       });
       return;
     }
@@ -154,7 +153,7 @@ class Session {
       this.send({
         msg: 'nosub',
         id: msg.id,
-        error: 'sub-not-found'
+        error: 'sub-not-found',
       });
       return;
     }
@@ -165,7 +164,7 @@ class Session {
       handler,
       name,
       params,
-      id: msg.id
+      id: msg.id,
     });
     this._subscriptions[msg.id] = subscription;
     subscription.start();
@@ -190,7 +189,7 @@ class Session {
       this.send({
         msg: 'error',
         reason: 'no-such-subscription-to-unsub',
-        offendingMessage: msg
+        offendingMessage: msg,
       });
       return;
     }
@@ -218,7 +217,7 @@ class Session {
       this.send({
         msg: 'error',
         reason: 'unknown-msg-type',
-        offendingMessage: msg
+        offendingMessage: msg,
       });
       return;
     }
@@ -260,7 +259,7 @@ class Session {
         this.send({
           msg: 'error',
           reason: 'must-provide-msg-type',
-          offendingMessage: data
+          offendingMessage: data,
         });
         return;
       }
@@ -271,6 +270,5 @@ class Session {
     });
   }
 }
-
 
 module.exports = Session;
