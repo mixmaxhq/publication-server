@@ -21,7 +21,7 @@ class PublicationServer {
    *    to.
    * @param {Object} server The HTTP server to allow Primus to listen on.
    */
-  constructor({authFn, mountPath, errHandler, server, transformer} = {}) {
+  constructor({ authFn, mountPath, errHandler, server, transformer } = {}) {
     assert(authFn, 'Must provide an authorization function');
 
     this._subscriptions = {};
@@ -40,11 +40,11 @@ class PublicationServer {
       pathname: this._mountPath,
       parser: 'EJSON',
       transformer: transformer || 'uws',
-      pingInterval: false
+      pingInterval: false,
     });
 
     this._primus.on('connection', (spark) => {
-      new Session({server: this, spark});
+      new Session({ server: this, spark });
     });
   }
 
@@ -82,11 +82,13 @@ class PublicationServer {
    *    details.
    */
   shutdown(timeout, options) {
-    this._primus.destroy(_.defaults(options, {
-      // Don't force the HTTP server to close by default, that's not our job.
-      close: false,
-      timeout
-    }));
+    this._primus.destroy(
+      _.defaults(options, {
+        // Don't force the HTTP server to close by default, that's not our job.
+        close: false,
+        timeout,
+      })
+    );
   }
 }
 
