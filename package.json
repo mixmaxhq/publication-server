@@ -22,8 +22,10 @@
     "uws": "^0.14.1"
   },
   "devDependencies": {
-    "eslint": "^5.15.3",
-    "eslint-config-mixmax": "^2.0.0"
+    "@mixmaxhq/prettier-config": "^1.0.0",
+    "eslint": "^6.8.0",
+    "eslint-config-mixmax": "^4.8.0",
+    "prettier": "^1.19.1"
   },
   "repository": {
     "type": "git",
