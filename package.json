@@ -17,7 +17,7 @@
   "dependencies": {
     "ejson": "^2.1.2",
     "node-uuid": "^1.4.7",
-    "primus": "^6.1.0",
+    "primus": "^8.0.1",
     "underscore": "^1.8.3",
     "uws": "^0.14.1"
   },
