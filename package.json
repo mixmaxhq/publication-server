@@ -19,7 +19,8 @@
     "node-uuid": "^1.4.7",
     "primus": "^8.0.1",
     "underscore": "^1.8.3",
-    "uws": "^0.14.1"
+    "uws": "^0.14.1",
+    "ws": "^7.4.2"
   },
   "devDependencies": {
     "@mixmaxhq/prettier-config": "^1.0.0",
