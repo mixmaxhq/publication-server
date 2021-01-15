@@ -1,5 +1,7 @@
 ## Release History
 
+* 2.1.0 Add in some primus 8 enhancements, this requires usage of publication-client@>v2.
+
 * 2.0.0 Update primus to 8.0.1. You must now install your own transformer packages.
 
 * 1.9.2 Fix botched 1.9.1 publish to include primus and uws downgrades
