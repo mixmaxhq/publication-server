@@ -254,7 +254,7 @@ class Session {
     });
 
     this.spark.on('data', (data) => {
-      if (!data.msg) {
+      if (!data.msg && (data.indexOf && data.indexOf('primus::ping') !== 0)) {
         // If no msg type was sent, ignore it.
         this.send({
           msg: 'error',
